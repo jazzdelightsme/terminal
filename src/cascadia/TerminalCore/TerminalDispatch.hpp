@@ -16,6 +16,10 @@ public:
     bool SetGraphicsRendition(const ::Microsoft::Console::VirtualTerminal::DispatchTypes::GraphicsOptions* const rgOptions,
                               const size_t cOptions) override;
 
+    bool PushGraphicsRendition(const ::Microsoft::Console::VirtualTerminal::DispatchTypes::GraphicsOptions* const rgOptions,
+                               const size_t cOptions) override;
+    bool PopGraphicsRendition() override;
+
     virtual bool CursorPosition(const unsigned int uiLine,
                                 const unsigned int uiColumn) override; // CUP
 
