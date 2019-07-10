@@ -6,6 +6,7 @@
 #include <conattrs.hpp>
 
 #include "../../buffer/out/textBuffer.hpp"
+#include "../../buffer/out/sgrStack.hpp"
 #include "../../renderer/inc/IRenderData.hpp"
 #include "../../terminal/parser/StateMachine.hpp"
 #include "../../terminal/input/terminalInput.hpp"
@@ -82,6 +83,8 @@ public:
     bool SetCursorStyle(const ::Microsoft::Console::VirtualTerminal::DispatchTypes::CursorStyle cursorStyle) override;
     bool SetDefaultForeground(const COLORREF dwColor) override;
     bool SetDefaultBackground(const COLORREF dwColor) override;
+    bool PushGraphicsRendition(const ::Microsoft::Console::VirtualTerminal::DispatchTypes::GraphicsOptions* options, size_t cOptions) override;
+    bool PopGraphicsRendition() override;
 #pragma endregion
 
 #pragma region ITerminalInput
@@ -241,4 +244,6 @@ private:
     SMALL_RECT _GetSelectionRow(const SHORT row, const COORD higherCoord, const COORD lowerCoord) const;
     void _ExpandSelectionRow(SMALL_RECT& selectionRow) const;
 #pragma endregion
+
+    Microsoft::Console::VirtualTerminal::SgrStack _sgrStack;
 };

@@ -27,6 +27,10 @@ namespace Microsoft::Console::VirtualTerminal::DispatchTypes
         Negative = 7,
         Invisible = 8,
         CrossedOut = 9,
+        // 10 - 19 are actually for selecting fonts, but rarely implemented. 10 and 11
+        // have been repurposed by xterm for XTPUSHGR.
+        SaveForegroundColor = 10,
+        SaveBackgroundColor = 11,
         DoublyUnderlined = 21,
         UnBold = 22,
         NotItalics = 23,

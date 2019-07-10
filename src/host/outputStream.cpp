@@ -193,7 +193,7 @@ BOOL ConhostInternalGetSet::PrivateSetDefaultAttributes(const bool fForeground,
 // - fBackground - The new attributes contain an update to the background attributes
 // - fMeta - The new attributes contain an update to the meta attributes
 // Return Value:
-// - TRUE if successful (see DoSrvVtSetLegacyAttributes). FALSE otherwise.
+// - TRUE.
 BOOL ConhostInternalGetSet::PrivateSetLegacyAttributes(const WORD wAttr,
                                                        const bool fForeground,
                                                        const bool fBackground,
@@ -203,6 +203,12 @@ BOOL ConhostInternalGetSet::PrivateSetLegacyAttributes(const WORD wAttr,
     return TRUE;
 }
 
+// Routine Description:
+// - Similar to PrivateSetLegacyAttributes, but sets the full fidelity TextAttribute.
+// Arguments:
+// - attributes - new text attributes to apply as default within the console text buffer
+// Return Value:
+// - TRUE.
 BOOL ConhostInternalGetSet::PrivateSetAttributes(const TextAttribute& attributes)
 {
     DoSrvPrivateSetAttributes(_io.GetActiveOutputBuffer(), attributes);

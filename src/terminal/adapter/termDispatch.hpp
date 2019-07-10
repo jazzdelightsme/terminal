@@ -74,6 +74,10 @@ public:
     bool SetGraphicsRendition(_In_reads_(_Param_(2)) const DispatchTypes::GraphicsOptions* const /*rgOptions*/,
                               const size_t /*cOptions*/) override { return false; } // SGR
 
+    bool PushGraphicsRendition(_In_reads_(_Param_(2)) const DispatchTypes::GraphicsOptions* const /*rgOptions*/,
+                               const size_t /*cOptions*/) override { return false; } // XTPUSHSGR
+    bool PopGraphicsRendition() override { return false; } // XTPOPSGR
+
     bool SetPrivateModes(_In_reads_(_Param_(2)) const DispatchTypes::PrivateModeParams* const /*rgParams*/,
                          const size_t /*cParams*/) override { return false; } // DECSET
 
