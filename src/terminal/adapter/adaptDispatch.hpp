@@ -19,6 +19,7 @@ Author(s):
 #include "conGetSet.hpp"
 #include "adaptDefaults.hpp"
 #include "terminalOutput.hpp"
+#include "..\..\buffer\out\sgrStack.hpp"
 #include <math.h>
 
 #define XTERM_COLOR_TABLE_SIZE (256)
@@ -58,6 +59,9 @@ namespace Microsoft::Console::VirtualTerminal
         bool DeleteCharacter(_In_ unsigned int const uiCount) override; // DCH
         bool SetGraphicsRendition(_In_reads_(cOptions) const DispatchTypes::GraphicsOptions* const rgOptions,
                                   const size_t cOptions) override; // SGR
+        bool PushGraphicsRendition(_In_reads_(cOptions) const DispatchTypes::GraphicsOptions* const rgOptions,
+                                   const size_t cOptions) override; // XTPUSHSGR
+        bool PopGraphicsRendition() override; // XTPOPSGR
         bool DeviceStatusReport(const DispatchTypes::AnsiStatusType statusType) override; // DSR
         bool DeviceAttributes() override; // DA
         bool ScrollUp(_In_ unsigned int const uiDistance) override; // SU
@@ -154,13 +158,13 @@ namespace Microsoft::Console::VirtualTerminal
         bool _fIsOriginModeRelative;
         bool _fIsSavedOriginModeRelative;
 
-        bool _fIsSetColumnsEnabled;
-
         bool _fIsDECCOLMAllowed;
 
         bool _fChangedForeground;
         bool _fChangedBackground;
         bool _fChangedMetaAttrs;
+
+        SgrStack _sgrStack;
 
         bool _SetRgbColorsHelper(_In_reads_(cOptions) const DispatchTypes::GraphicsOptions* const rgOptions,
                                  const size_t cOptions,

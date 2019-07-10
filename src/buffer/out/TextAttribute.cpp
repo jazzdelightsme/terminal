@@ -119,6 +119,7 @@ void TextAttribute::SetFromLegacy(const WORD wLegacy) noexcept
     BYTE bgIndex = static_cast<BYTE>(wLegacy & BG_ATTRS) >> 4;
     _foreground = TextColor(fgIndex);
     _background = TextColor(bgIndex);
+    //SetMetaAttributes(wLegacy); // [danthom] should this be here?
 }
 
 void TextAttribute::SetLegacyAttributes(const WORD attrs,
@@ -226,17 +227,17 @@ bool TextAttribute::IsRightVerticalDisplayed() const noexcept
     return WI_IsFlagSet(_wAttrLegacy, COMMON_LVB_GRID_RVERTICAL);
 }
 
-void TextAttribute::SetLeftVerticalDisplayed(bool isDisplayed) noexcept
+void TextAttribute::SetLeftVerticalDisplayed(const bool isDisplayed) noexcept
 {
     WI_UpdateFlag(_wAttrLegacy, COMMON_LVB_GRID_LVERTICAL, isDisplayed);
 }
 
-void TextAttribute::SetRightVerticalDisplayed(bool isDisplayed) noexcept
+void TextAttribute::SetRightVerticalDisplayed(const bool isDisplayed) noexcept
 {
     WI_UpdateFlag(_wAttrLegacy, COMMON_LVB_GRID_RVERTICAL, isDisplayed);
 }
 
-void TextAttribute::SetBottomHorizontalDisplayed(bool isDisplayed) noexcept
+void TextAttribute::SetBottomHorizontalDisplayed(const bool isDisplayed) noexcept
 {
     WI_UpdateFlag(_wAttrLegacy, COMMON_LVB_UNDERSCORE, isDisplayed);
 }

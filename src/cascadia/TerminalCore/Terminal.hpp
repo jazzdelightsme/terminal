@@ -6,6 +6,7 @@
 #include <conattrs.hpp>
 
 #include "../../buffer/out/textBuffer.hpp"
+#include "../../buffer/out/sgrStack.hpp"
 #include "../../renderer/inc/IRenderData.hpp"
 #include "../../terminal/parser/StateMachine.hpp"
 #include "../../terminal/input/terminalInput.hpp"
@@ -76,6 +77,9 @@ public:
     bool SetCursorStyle(const ::Microsoft::Console::VirtualTerminal::DispatchTypes::CursorStyle cursorStyle) override;
     bool SetDefaultForeground(const COLORREF dwColor) override;
     bool SetDefaultBackground(const COLORREF dwColor) override;
+
+    bool PushGraphicsRendition(const ::Microsoft::Console::VirtualTerminal::DispatchTypes::GraphicsOptions* options, size_t cOptions) override;
+    bool PopGraphicsRendition() override;
 #pragma endregion
 
 #pragma region ITerminalInput
@@ -219,4 +223,6 @@ private:
     const bool _isWordDelimiter(std::wstring_view cellChar) const;
     const COORD _ConvertToBufferCell(const COORD viewportPos) const;
 #pragma endregion
+
+    Microsoft::Console::VirtualTerminal::SgrStack _sgrStack;
 };

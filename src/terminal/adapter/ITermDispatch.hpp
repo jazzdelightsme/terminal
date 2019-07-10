@@ -77,6 +77,10 @@ public:
     virtual bool SetGraphicsRendition(_In_reads_(cOptions) const DispatchTypes::GraphicsOptions* const rgOptions,
                                       const size_t cOptions) = 0; // SGR
 
+    virtual bool PushGraphicsRendition(_In_reads_(cOptions) const DispatchTypes::GraphicsOptions* const rgOptions,
+                                       const size_t cOptions) = 0; // XTPUSHSGR
+    virtual bool PopGraphicsRendition() = 0; // XTPOPSGR
+
     virtual bool SetPrivateModes(_In_reads_(cParams) const DispatchTypes::PrivateModeParams* const rgParams,
                                  const size_t cParams) = 0; // DECSET
 

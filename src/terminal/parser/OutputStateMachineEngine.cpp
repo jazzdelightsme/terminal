@@ -504,6 +504,9 @@ bool OutputStateMachineEngine::ActionCsiDispatch(const wchar_t wch,
         case L' ':
             fSuccess = _IntermediateSpaceDispatch(wch, rgusParams, cParams);
             break;
+        case L'#':
+            fSuccess = _IntermediateHashDispatch(wch, rgusParams, cParams);
+            break;
         default:
             // If no functions to call, overall dispatch was a failure.
             fSuccess = false;
@@ -541,7 +544,7 @@ bool OutputStateMachineEngine::_IntermediateQuestionMarkDispatch(const wchar_t w
     {
     case VTActionCodes::DECSET_PrivateModeSet:
     case VTActionCodes::DECRST_PrivateModeReset:
-        fSuccess = _GetPrivateModeParams(rgusParams, cParams, rgPrivateModeParams, &cOptions);
+        fSuccess = _GetTypedParams(rgusParams, cParams, rgPrivateModeParams, &cOptions);
         break;
 
     default:
@@ -636,6 +639,71 @@ bool OutputStateMachineEngine::_IntermediateSpaceDispatch(const wchar_t wchActio
         }
     }
 
+    return fSuccess;
+}
+
+// Routine Description:
+// - Handles actions that have an intermediate '#' (0x23), such as XTPUSHSGR, XTPOPSGR
+// Arguments:
+// - wch - Character to dispatch.
+// Return Value:
+// - True if handled successfully. False otherwise.
+bool OutputStateMachineEngine::_IntermediateHashDispatch(const wchar_t wchAction,
+                                                         _In_reads_(cParams) const unsigned short* const rgusParams,
+                                                         const unsigned short cParams)
+{
+    bool fSuccess = false;
+
+    DispatchTypes::GraphicsOptions rgPushPopParams[StateMachine::s_cParamsMax];
+    size_t cOptions = StateMachine::s_cParamsMax;
+    // Ensure that there was the right number of params
+    switch (wchAction)
+    {
+    case VTActionCodes::XT_PushSgr:
+    case VTActionCodes::XT_PushSgrAlias:
+        fSuccess = _GetTypedParams(rgusParams, cParams, rgPushPopParams, &cOptions);
+        break;
+
+    case VTActionCodes::XT_PopSgr:
+    case VTActionCodes::XT_PopSgrAlias:
+        if (cParams > 0)
+        {
+            // Can't supply params for XTPOPSGR.
+            fSuccess = false;
+        }
+        else
+        {
+            fSuccess = true;
+        }
+        break;
+
+    default:
+        // If no params to fill, param filling was successful.
+        fSuccess = true;
+        break;
+    }
+    if (fSuccess)
+    {
+        switch (wchAction)
+        {
+        case VTActionCodes::XT_PushSgr:
+        case VTActionCodes::XT_PushSgrAlias:
+            fSuccess = _dispatch->PushGraphicsRendition(rgPushPopParams, cOptions);
+            // TODO: telemetry
+            break;
+
+        case VTActionCodes::XT_PopSgr:
+        case VTActionCodes::XT_PopSgrAlias:
+            fSuccess = _dispatch->PopGraphicsRendition();
+            // TODO: telemetry
+            break;
+
+        default:
+            // If no functions to call, overall dispatch was a failure.
+            fSuccess = false;
+            break;
+        }
+    }
     return fSuccess;
 }
 
@@ -1071,6 +1139,7 @@ _Success_(return ) bool OutputStateMachineEngine::_GetTopBottomMargins(_In_reads
     }
     return fSuccess;
 }
+
 // Routine Description:
 // - Retrieves the status type parameter for an upcoming device query operation
 // Arguments:
@@ -1103,27 +1172,27 @@ _Success_(return ) bool OutputStateMachineEngine::_GetDeviceStatusOperation(_In_
 }
 
 // Routine Description:
-// - Retrieves the listed private mode params be set/reset by DECSET/DECRST
+// - Converts the untyped array of numeric parameters into an array of the specified type.
 // Arguments:
-// - rPrivateModeParams - Pointer to array space (expected 16 max, the max number of params this can generate) that will be filled with valid params from the PrivateModeParams enum
-// - pcParams - Pointer to the length of rPrivateModeParams on the way in, and the count of the array used on the way out.
+// - rgTypedParams - Pointer to array space (expected 16 max, the max number of params this can generate) that will be filled with valid params from the PrivateModeParams enum
+// - pcParams - Pointer to the length of rgTypedParams on the way in, and the count of the array used on the way out.
 // Return Value:
-// - True if we successfully retrieved an array of private mode params from the parameters we've stored. False otherwise.
-_Success_(return ) bool OutputStateMachineEngine::_GetPrivateModeParams(_In_reads_(cParams) const unsigned short* const rgusParams,
-                                                                        const unsigned short cParams,
-                                                                        _Out_writes_(*pcParams) DispatchTypes::PrivateModeParams* const rgPrivateModeParams,
-                                                                        _Inout_ size_t* const pcParams) const
+// - True if we successfully retrieved an array of strongly-typed params from the parameters we've stored. False otherwise.
+template<typename TParamType>
+_Success_(return ) bool OutputStateMachineEngine::_GetTypedParams(_In_reads_(cParams) const unsigned short* const rgusParams,
+                                                                  const unsigned short cParams,
+                                                                  _Out_writes_(*pcParams) TParamType* const rgTypedParams,
+                                                                  _Inout_ size_t* const pcParams) const
 {
     bool fSuccess = false;
-    // Can't just set nothing at all
     if (cParams > 0)
     {
         if (*pcParams >= cParams)
         {
             for (size_t i = 0; i < cParams; i++)
             {
-                // No memcpy. The parameters are shorts. The graphics options are unsigned ints.
-                rgPrivateModeParams[i] = (DispatchTypes::PrivateModeParams)rgusParams[i];
+                // No memcpy because the parameters are shorts, and the destination type may be a different size.
+                rgTypedParams[i] = static_cast<TParamType>(rgusParams[i]);
             }
             *pcParams = cParams;
             fSuccess = true;
@@ -1132,6 +1201,11 @@ _Success_(return ) bool OutputStateMachineEngine::_GetPrivateModeParams(_In_read
         {
             fSuccess = false; // not enough space in buffer to hold response.
         }
+    }
+    else
+    {
+        *pcParams = 0;
+        fSuccess = true;
     }
     return fSuccess;
 }

@@ -105,9 +105,9 @@ public:
     bool IsLeftVerticalDisplayed() const noexcept;
     bool IsRightVerticalDisplayed() const noexcept;
 
-    void SetLeftVerticalDisplayed(bool isDisplayed) noexcept;
-    void SetRightVerticalDisplayed(bool isDisplayed) noexcept;
-    void SetBottomHorizontalDisplayed(bool isDisplayed) noexcept;
+    void SetLeftVerticalDisplayed(const bool isDisplayed) noexcept;
+    void SetRightVerticalDisplayed(const bool isDisplayed) noexcept;
+    void SetBottomHorizontalDisplayed(const bool isDisplayed) noexcept;
 
     void SetFromLegacy(const WORD wLegacy) noexcept;
 

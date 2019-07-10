@@ -25,6 +25,8 @@ namespace Microsoft::Console::VirtualTerminal::DispatchTypes
         // the 2 and 5 entries here are only for the extended graphics options
         // as we do not currently support those features individually
         Negative = 7,
+        ForegroundColor = 10,
+        BackgroundColor = 11,
         UnBold = 22,
         NoUnderline = 24,
         Positive = 27,

@@ -448,3 +448,49 @@ bool AdaptDispatch::SetGraphicsRendition(_In_reads_(cOptions) const DispatchType
 
     return fSuccess;
 }
+
+// Method Description:
+// - Saves the current text attributes to an internal stack.
+// Arguments:
+// - rgOptions, cOptions: if present, specify which portions of the current text attributes
+//   should be saved. Only a small subset of GraphicsOptions are actually supported;
+//   others are ignored. If no options are specified, all attributes are stored.
+// Return Value:
+// - True if handled successfully. False otherwise.
+bool AdaptDispatch::PushGraphicsRendition(_In_reads_(cOptions) const DispatchTypes::GraphicsOptions* const rgOptions,
+                                          const size_t cOptions)
+{
+    bool fSuccess = true;
+    TextAttribute currentAttributes;
+
+    fSuccess = _conApi->PrivateGetConsoleScreenBufferAttributes(&currentAttributes);
+
+    if (fSuccess)
+    {
+        _sgrStack.Push(currentAttributes, rgOptions, cOptions);
+    }
+
+    return fSuccess;
+}
+
+// Method Description:
+// - Restores text attributes from the internal stack. If only portions of text attributes
+//   were saved, combines those with the current attributes.
+// Arguments:
+// - <none>
+// Return Value:
+// - True if handled successfully. False otherwise.
+bool AdaptDispatch::PopGraphicsRendition()
+{
+    bool fSuccess = true;
+    TextAttribute currentAttributes;
+
+    fSuccess = _conApi->PrivateGetConsoleScreenBufferAttributes(&currentAttributes);
+
+    if (fSuccess)
+    {
+        fSuccess = _conApi->PrivateSetAttributes(_sgrStack.Pop(currentAttributes));
+    }
+
+    return fSuccess;
+}

@@ -326,3 +326,14 @@ bool TerminalDispatch::SetGraphicsRendition(const DispatchTypes::GraphicsOptions
     }
     return fSuccess;
 }
+
+bool TerminalDispatch::PushGraphicsRendition(const DispatchTypes::GraphicsOptions* const rgOptions,
+                                             const size_t cOptions)
+{
+    return _terminalApi.PushGraphicsRendition(rgOptions, cOptions);
+}
+
+bool TerminalDispatch::PopGraphicsRendition()
+{
+    return _terminalApi.PopGraphicsRendition();
+}

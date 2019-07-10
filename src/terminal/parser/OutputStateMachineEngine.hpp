@@ -81,6 +81,9 @@ namespace Microsoft::Console::VirtualTerminal
         bool _IntermediateSpaceDispatch(const wchar_t wchAction,
                                         _In_reads_(cParams) const unsigned short* const rgusParams,
                                         const unsigned short cParams);
+        bool _IntermediateHashDispatch(const wchar_t wchAction,
+                                       _In_reads_(cParams) const unsigned short* const rgusParams,
+                                       const unsigned short cParams);
 
         enum VTActionCodes : wchar_t
         {
@@ -126,7 +129,11 @@ namespace Microsoft::Console::VirtualTerminal
             // 'q' is overloaded - no postfix is DECLL, ' ' postfix is DECSCUSR, and '"' is DECSCA
             DECSCUSR_SetCursorStyle = L'q', // I believe we'll only ever implement DECSCUSR
             DTTERM_WindowManipulation = L't',
-            REP_RepeatCharacter = L'b'
+            REP_RepeatCharacter = L'b',
+            XT_PushSgr = L'{',
+            XT_PushSgrAlias = L'p',
+            XT_PopSgr = L'}',
+            XT_PopSgrAlias = L'q',
         };
 
         enum OscActionCodes : unsigned int
@@ -194,10 +201,11 @@ namespace Microsoft::Console::VirtualTerminal
         _Success_(return ) bool _VerifyDeviceAttributesParams(_In_reads_(cParams) const unsigned short* const rgusParams,
                                                               const unsigned short cParams) const;
 
-        _Success_(return ) bool _GetPrivateModeParams(_In_reads_(cParams) const unsigned short* const rgusParams,
-                                                      const unsigned short cParams,
-                                                      _Out_writes_(*pcParams) DispatchTypes::PrivateModeParams* const rgPrivateModeParams,
-                                                      _Inout_ size_t* const pcParams) const;
+        template<typename TParamType>
+        _Success_(return ) bool _GetTypedParams(_In_reads_(cParams) const unsigned short* const rgusParams,
+                                                const unsigned short cParams,
+                                                _Out_writes_(*pcParams) TParamType* const rgXtPushParams,
+                                                _Inout_ size_t* const pcParams) const;
 
         static const SHORT s_sDefaultTopMargin = 0;
         static const SHORT s_sDefaultBottomMargin = 0;
