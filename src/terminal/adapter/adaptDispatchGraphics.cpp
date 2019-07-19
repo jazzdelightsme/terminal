@@ -491,7 +491,7 @@ bool AdaptDispatch::SetGraphicsRendition(_In_reads_(cOptions) const DispatchType
     // OS and wastes time memcpying colors and other data we do not need to
     // resolve this Set Graphics Rendition request.
     WORD attr;
-    bool fSuccess = !!_conApi->PrivateGetConsoleScreenBufferAttributes(&attr);
+    bool fSuccess = !!_conApi->PrivateGetConsoleScreenBufferLegacyAttributes(&attr);
 
     if (fSuccess)
     {
