@@ -229,6 +229,16 @@ public:
         return _fPrivateSetLegacyAttributesResult;
     }
 
+    BOOL PrivateSetAttributes(const TextAttribute& attributes) override
+    {
+        Log::Comment(L"PrivateSetAttributes MOCK called...");
+
+        // TODO
+        UNREFERENCED_PARAMETER(attributes);
+
+        return TRUE;
+    }
+
     BOOL SetConsoleXtermTextAttribute(const int iXtermTableEntry, const bool fIsForeground) override
     {
         Log::Comment(L"SetConsoleXtermTextAttribute MOCK called...");
@@ -540,13 +550,26 @@ public:
         return _fSetCursorColorResult;
     }
 
-    BOOL PrivateGetConsoleScreenBufferAttributes(_Out_ WORD* const pwAttributes) override
+    BOOL PrivateGetConsoleScreenBufferLegacyAttributes(_Out_ WORD* const pwAttributes) override
+    {
+        Log::Comment(L"PrivateGetConsoleScreenBufferLegacyAttributes MOCK returning data...");
+
+        if (pwAttributes != nullptr && _fPrivateGetConsoleScreenBufferLegacyAttributesResult)
+        {
+            *pwAttributes = _wAttribute;
+        }
+
+        return _fPrivateGetConsoleScreenBufferLegacyAttributesResult;
+    }
+
+    BOOL PrivateGetConsoleScreenBufferAttributes(_Out_ TextAttribute* const pAttributes) override
     {
         Log::Comment(L"PrivateGetConsoleScreenBufferAttributes MOCK returning data...");
 
-        if (pwAttributes != nullptr && _fPrivateGetConsoleScreenBufferAttributesResult)
+        if (pAttributes != nullptr && _fPrivateGetConsoleScreenBufferAttributesResult)
         {
-            *pwAttributes = _wAttribute;
+            // TODO
+            *pAttributes = TextAttribute();
         }
 
         return _fPrivateGetConsoleScreenBufferAttributesResult;
@@ -718,6 +741,7 @@ public:
         _fPrivatePrependConsoleInputResult = TRUE;
         _fPrivateWriteConsoleControlInputResult = TRUE;
         _fSetConsoleWindowInfoResult = TRUE;
+        _fPrivateGetConsoleScreenBufferLegacyAttributesResult = TRUE;
         _fPrivateGetConsoleScreenBufferAttributesResult = TRUE;
         _fMoveToBottomResult = true;
 
@@ -912,6 +936,7 @@ public:
     BOOL _fSetConsoleXtermTextAttributeResult = false;
     BOOL _fSetConsoleRGBTextAttributeResult = false;
     BOOL _fPrivateSetLegacyAttributesResult = false;
+    BOOL _fPrivateGetConsoleScreenBufferLegacyAttributesResult = false;
     BOOL _fPrivateGetConsoleScreenBufferAttributesResult = false;
     BOOL _fSetCursorStyleResult = false;
     CursorType _ExpectedCursorStyle;
@@ -1473,7 +1498,7 @@ public:
         Log::Comment(L"Test 2: Gracefully fail when getting buffer information fails.");
 
         _testGetSet->PrepData();
-        _testGetSet->_fPrivateGetConsoleScreenBufferAttributesResult = FALSE;
+        _testGetSet->_fPrivateGetConsoleScreenBufferLegacyAttributesResult = FALSE;
 
         VERIFY_IS_FALSE(_pDispatch->SetGraphicsRendition(rgOptions, cOptions));
 

@@ -69,6 +69,8 @@ public:
                                     const bool fBackground,
                                     const bool fMeta) override;
 
+    BOOL PrivateSetAttributes(const TextAttribute& attributes) override;
+
     BOOL PrivateSetDefaultAttributes(const bool fForeground,
                                      const bool fBackground) override;
 
@@ -122,7 +124,8 @@ public:
     BOOL PrivateEnableAlternateScroll(const bool fEnabled) override;
     BOOL PrivateEraseAll() override;
 
-    BOOL PrivateGetConsoleScreenBufferAttributes(_Out_ WORD* const pwAttributes) override;
+    BOOL PrivateGetConsoleScreenBufferLegacyAttributes(_Out_ WORD* const pwAttributes) override;
+    BOOL PrivateGetConsoleScreenBufferAttributes(_Out_ TextAttribute* const pAttributes) override;
 
     BOOL PrivatePrependConsoleInput(_Inout_ std::deque<std::unique_ptr<IInputEvent>>& events,
                                     _Out_ size_t& eventsWritten) override;
