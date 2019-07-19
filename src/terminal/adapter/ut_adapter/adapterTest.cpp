@@ -81,7 +81,7 @@ public:
             VERIFY_ARE_EQUAL(_expectedCursorPos, sbiex.dwCursorPosition);
             VERIFY_ARE_EQUAL(_expectedScreenBufferSize, sbiex.dwSize);
             VERIFY_ARE_EQUAL(_expectedScreenBufferViewport, sbiex.srWindow);
-            VERIFY_ARE_EQUAL(_expectedAttributes, sbiex.wAttributes);
+            VERIFY_ARE_EQUAL(_expectedAttribute.GetLegacyAttributes(), sbiex.wAttributes);
         }
         return _setConsoleScreenBufferInfoExResult;
     }
@@ -612,7 +612,8 @@ public:
         _expectedCursorVisible = _cursorVisible;
 
         // Attribute default is gray on black.
-        _attribute = FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED;
+        _attribute = {};
+        _attribute.SetFromLegacy(FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED);
         _expectedAttribute = _attribute;
     }
 
@@ -739,7 +740,6 @@ public:
 
     COORD _expectedScreenBufferSize = { 0, 0 };
     SMALL_RECT _expectedScreenBufferViewport{ 0, 0, 0, 0 };
-    WORD _expectedAttributes = 0;
     bool _privateSetCursorKeysModeResult = false;
     bool _privateSetKeypadModeResult = false;
     bool _cursorKeysApplicationMode = false;
@@ -1249,6 +1249,7 @@ public:
         DispatchTypes::GraphicsOptions rgOptions[16];
         size_t cOptions = 1;
         rgOptions[0] = graphicsOption;
+        WORD expectedLegacy = 0;
 
         switch (graphicsOption)
         {
@@ -1463,6 +1464,170 @@ public:
         }
 
         VERIFY_IS_TRUE(_pDispatch.get()->SetGraphicsRendition({ rgOptions, cOptions }));
+    }
+
+    TEST_METHOD(GraphicsPushPopTests)
+    {
+        Log::Comment(L"Starting test...");
+
+        _testGetSet->PrepData(); // default color from here is gray on black, FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED
+
+        _testGetSet->_privateSetLegacyAttributesResult = TRUE;
+
+        DispatchTypes::GraphicsOptions rgOptions[16];
+        DispatchTypes::SgrSaveRestoreStackOptions rgStackOptions[16];
+        size_t cOptions = 1;
+
+        Log::Comment(L"Test 1: Basic push and pop");
+
+        rgOptions[0] = DispatchTypes::GraphicsOptions::Off;
+        _testGetSet->_privateSetDefaultAttributesResult = true;
+        _testGetSet->_expectedAttribute.SetFromLegacy(0);
+        _testGetSet->_expectedForeground = true;
+        _testGetSet->_expectedBackground = true;
+        _testGetSet->_expectedMeta = true;
+        _testGetSet->_privateBoldTextResult = true;
+        _testGetSet->_expectedIsBold = false;
+        VERIFY_IS_TRUE(_pDispatch->SetGraphicsRendition({ rgOptions, cOptions }));
+
+        cOptions = 0;
+        VERIFY_IS_TRUE(_pDispatch->PushGraphicsRendition({ rgStackOptions, cOptions }));
+
+        _testGetSet->_privateGetTextAttributesResult = true;
+        _testGetSet->_privateSetTextAttributesResult = true;
+        _testGetSet->_expectedAttribute.SetDefaultBackground();
+        _testGetSet->_expectedAttribute.SetDefaultForeground();
+        VERIFY_IS_TRUE(_pDispatch->PopGraphicsRendition());
+
+        Log::Comment(L"Test 2: Push, change color, pop");
+
+        VERIFY_IS_TRUE(_pDispatch->PushGraphicsRendition({ rgStackOptions, cOptions }));
+
+        cOptions = 1;
+        rgOptions[0] = DispatchTypes::GraphicsOptions::ForegroundCyan;
+        _testGetSet->_expectedAttribute.SetFromLegacy(3);
+        _testGetSet->_expectedForeground = true;
+        _testGetSet->_expectedBackground = false;
+        _testGetSet->_expectedMeta = false;
+        VERIFY_IS_TRUE(_pDispatch->SetGraphicsRendition({ rgOptions, cOptions }));
+
+        cOptions = 0;
+        _testGetSet->_privateGetTextAttributesResult = true;
+        _testGetSet->_privateSetTextAttributesResult = true;
+        _testGetSet->_expectedAttribute.SetDefaultBackground();
+        _testGetSet->_expectedAttribute.SetDefaultForeground();
+        VERIFY_IS_TRUE(_pDispatch->PopGraphicsRendition());
+
+        Log::Comment(L"Test 3: two pushes (nested) and pops");
+
+        // First push:
+        VERIFY_IS_TRUE(_pDispatch->PushGraphicsRendition({ rgStackOptions, cOptions }));
+
+        cOptions = 1;
+        rgOptions[0] = DispatchTypes::GraphicsOptions::ForegroundRed;
+        _testGetSet->_expectedAttribute.SetFromLegacy(FOREGROUND_RED);
+        _testGetSet->_expectedForeground = true;
+        _testGetSet->_expectedBackground = false;
+        _testGetSet->_expectedMeta = false;
+        VERIFY_IS_TRUE(_pDispatch->SetGraphicsRendition({ rgOptions, cOptions }));
+
+        // Second push:
+        cOptions = 0;
+        VERIFY_IS_TRUE(_pDispatch->PushGraphicsRendition({ rgStackOptions, cOptions }));
+
+        cOptions = 1;
+        rgOptions[0] = DispatchTypes::GraphicsOptions::ForegroundGreen;
+        _testGetSet->_expectedAttribute.SetFromLegacy(FOREGROUND_GREEN);
+        _testGetSet->_expectedForeground = true;
+        _testGetSet->_expectedBackground = false;
+        _testGetSet->_expectedMeta = false;
+        VERIFY_IS_TRUE(_pDispatch->SetGraphicsRendition({ rgOptions, cOptions }));
+
+        // First pop:
+        cOptions = 0;
+        _testGetSet->_privateGetTextAttributesResult = true;
+        _testGetSet->_privateSetTextAttributesResult = true;
+        _testGetSet->_expectedAttribute.SetFromLegacy(FOREGROUND_RED);
+        // Q: The verification of the original SGR doesn't have to set the expected
+        //    background to default; why do we need it for the pop?
+        // A: The pop code path restores the entire TextAttribute, not just a legacy WORD,
+        //    so the full TextAttribute is compared against the full expected
+        //    TextAttribute (as opposed to just a WORD for the SGR path).
+        _testGetSet->_expectedAttribute.SetDefaultBackground();
+        VERIFY_IS_TRUE(_pDispatch->PopGraphicsRendition());
+
+        // Second pop:
+        cOptions = 0;
+        _testGetSet->_privateGetTextAttributesResult = true;
+        _testGetSet->_privateSetTextAttributesResult = true;
+        _testGetSet->_expectedAttribute.SetDefaultBackground();
+        _testGetSet->_expectedAttribute.SetDefaultForeground();
+        VERIFY_IS_TRUE(_pDispatch->PopGraphicsRendition());
+
+        Log::Comment(L"Test 4: Save and restore partial attributes");
+
+        cOptions = 1;
+        rgOptions[0] = DispatchTypes::GraphicsOptions::ForegroundGreen;
+        _testGetSet->_expectedAttribute.SetFromLegacy(FOREGROUND_GREEN);
+        _testGetSet->_expectedForeground = true;
+        _testGetSet->_expectedBackground = false;
+        _testGetSet->_expectedMeta = false;
+        VERIFY_IS_TRUE(_pDispatch->SetGraphicsRendition({ rgOptions, cOptions }));
+
+        cOptions = 1;
+        rgOptions[0] = DispatchTypes::GraphicsOptions::BoldBright;
+        // N.B. _expectedAttribute will not be checked for the BoldBright SGR.
+        _testGetSet->_privateBoldTextResult = true;
+        _testGetSet->_expectedIsBold = true;
+        VERIFY_IS_TRUE(_pDispatch->SetGraphicsRendition({ rgOptions, cOptions }));
+
+        rgOptions[0] = DispatchTypes::GraphicsOptions::BackgroundBlue;
+        _testGetSet->_expectedAttribute.SetFromLegacy(FOREGROUND_GREEN | FOREGROUND_INTENSITY | BACKGROUND_BLUE);
+        _testGetSet->_expectedForeground = false;
+        _testGetSet->_expectedBackground = true;
+        _testGetSet->_expectedMeta = false;
+        VERIFY_IS_TRUE(_pDispatch->SetGraphicsRendition({ rgOptions, cOptions }));
+
+        // Push, specifying that we only want to save the background, the boldness, and double-underline-ness:
+        cOptions = 3;
+        rgStackOptions[0] = DispatchTypes::SgrSaveRestoreStackOptions::Boldness;
+        rgStackOptions[1] = DispatchTypes::SgrSaveRestoreStackOptions::SaveBackgroundColor;
+        rgStackOptions[2] = DispatchTypes::SgrSaveRestoreStackOptions::DoublyUnderlined;
+        VERIFY_IS_TRUE(_pDispatch->PushGraphicsRendition({ rgStackOptions, cOptions }));
+
+        // Now change everything...
+        cOptions = 2;
+        rgOptions[0] = DispatchTypes::GraphicsOptions::BackgroundGreen;
+        rgOptions[1] = DispatchTypes::GraphicsOptions::DoublyUnderlined;
+        _testGetSet->_expectedAttribute.SetFromLegacy(FOREGROUND_GREEN | FOREGROUND_INTENSITY | BACKGROUND_GREEN);
+        _testGetSet->_expectedAttribute.SetDoublyUnderlined(true);
+        _testGetSet->_expectedForeground = false;
+        _testGetSet->_expectedBackground = true;
+        _testGetSet->_expectedMeta = false;
+        VERIFY_IS_TRUE(_pDispatch->SetGraphicsRendition({ rgOptions, cOptions }));
+
+        cOptions = 1;
+        rgOptions[0] = DispatchTypes::GraphicsOptions::ForegroundRed;
+        _testGetSet->_expectedAttribute.SetFromLegacy(FOREGROUND_RED | BACKGROUND_GREEN);
+        _testGetSet->_expectedForeground = true;
+        _testGetSet->_expectedBackground = false;
+        _testGetSet->_expectedMeta = false;
+        VERIFY_IS_TRUE(_pDispatch->SetGraphicsRendition({ rgOptions, cOptions }));
+
+        rgOptions[0] = DispatchTypes::GraphicsOptions::UnBold;
+        VERIFY_IS_TRUE(_pDispatch->SetGraphicsRendition({ rgOptions, cOptions }));
+
+        // And then restore...
+        cOptions = 0;
+        _testGetSet->_privateGetTextAttributesResult = true;
+        _testGetSet->_privateSetTextAttributesResult = true;
+        // Q: Why don't we set FOREGROUND_INTENSITY here?
+        // A: That flag is folded in on the fly when you call GetLegacyAttributes based on
+        //    the _isBold member, but it isn't actually stored in the legacy WORD.
+        _testGetSet->_expectedAttribute.SetFromLegacy(FOREGROUND_RED | BACKGROUND_BLUE);
+        _testGetSet->_expectedAttribute.SetBold(true);
+        _testGetSet->_expectedAttribute.SetDoublyUnderlined(false);
+        VERIFY_IS_TRUE(_pDispatch->PopGraphicsRendition());
     }
 
     TEST_METHOD(GraphicsPersistBrightnessTests)

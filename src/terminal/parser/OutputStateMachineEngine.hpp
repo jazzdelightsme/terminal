@@ -72,6 +72,8 @@ namespace Microsoft::Console::VirtualTerminal
         bool _IntermediateExclamationDispatch(const wchar_t wch);
         bool _IntermediateSpaceDispatch(const wchar_t wchAction,
                                         const std::basic_string_view<size_t> parameters);
+        bool _IntermediateHashDispatch(const wchar_t wchAction,
+                                       const std::basic_string_view<size_t> parameters);
 
         enum VTActionCodes : wchar_t
         {
@@ -123,7 +125,11 @@ namespace Microsoft::Console::VirtualTerminal
             DECSCUSR_SetCursorStyle = L'q', // I believe we'll only ever implement DECSCUSR
             DTTERM_WindowManipulation = L't',
             REP_RepeatCharacter = L'b',
-            DECALN_ScreenAlignmentPattern = L'8'
+            DECALN_ScreenAlignmentPattern = L'8',
+            XT_PushSgr = L'{',
+            XT_PushSgrAlias = L'p',
+            XT_PopSgr = L'}',
+            XT_PopSgrAlias = L'q',
         };
 
         enum OscActionCodes : unsigned int
@@ -182,8 +188,9 @@ namespace Microsoft::Console::VirtualTerminal
 
         bool _VerifyDeviceAttributesParams(const std::basic_string_view<size_t> parameters) const noexcept;
 
-        bool _GetPrivateModeParams(const std::basic_string_view<size_t> parameters,
-                                   std::vector<DispatchTypes::PrivateModeParams>& privateModes) const;
+        template<typename TParamType, bool bIgnoreNarrowingConversionFailures = true>
+        bool _GetTypedParams(const std::basic_string_view<size_t> parameters,
+                             std::vector<TParamType>& typedParams) const;
 
         static constexpr size_t DefaultTopMargin = 0;
         static constexpr size_t DefaultBottomMargin = 0;

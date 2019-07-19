@@ -578,3 +578,31 @@ bool Terminal::EnableCursorBlinking(const bool enable) noexcept
     _buffer->GetCursor().SetIsOn(true);
     return true;
 }
+
+// Method Description:
+// - Saves the current text attributes to an internal stack.
+// Arguments:
+// - options, cOptions: if present, specify which portions of the current text attributes
+//   should be saved. Only a small subset of GraphicsOptions are actually supported;
+//   others are ignored. If no options are specified, all attributes are stored.
+// Return Value:
+// - true
+bool Terminal::PushGraphicsRendition(const std::basic_string_view<::Microsoft::Console::VirtualTerminal::DispatchTypes::SgrSaveRestoreStackOptions> options) noexcept
+{
+    _sgrStack.Push(_buffer->GetCurrentAttributes(), options);
+    return true;
+}
+
+// Method Description:
+// - Restores text attributes from the internal stack. If only portions of text attributes
+//   were saved, combines those with the current attributes.
+// Arguments:
+// - <none>
+// Return Value:
+// - true
+bool Terminal::PopGraphicsRendition() noexcept
+{
+    const TextAttribute current = _buffer->GetCurrentAttributes();
+    _buffer->SetCurrentAttributes(_sgrStack.Pop(current));
+    return true;
+}

@@ -35,6 +35,32 @@ COLORREF TextAttribute::CalculateRgbBackground(std::basic_string_view<COLORREF> 
 }
 
 // Routine Description:
+// - Makes this TextAttribute's foreground color the same as the other one.
+// Arguments:
+// - The TextAttribute to copy the foreground color from
+// Return Value:
+// - <none>
+void TextAttribute::SetForegroundFrom(const TextAttribute& other) noexcept
+{
+    _foreground = other._foreground;
+    WI_ClearAllFlags(_wAttrLegacy, FG_ATTRS);
+    _wAttrLegacy |= (other._wAttrLegacy & FG_ATTRS);
+}
+
+// Routine Description:
+// - Makes this TextAttribute's background color the same as the other one.
+// Arguments:
+// - The TextAttribute to copy the background color from
+// Return Value:
+// - <none>
+void TextAttribute::SetBackgroundFrom(const TextAttribute& other) noexcept
+{
+    _background = other._background;
+    WI_ClearAllFlags(_wAttrLegacy, BG_ATTRS);
+    _wAttrLegacy |= (other._wAttrLegacy & BG_ATTRS);
+}
+
+// Routine Description:
 // - gets rgb foreground color, possibly based off of current color table. Does not take active modification
 // attributes into account
 // Arguments:
@@ -90,36 +116,6 @@ void TextAttribute::SetColor(const COLORREF rgbColor, const bool fIsForeground) 
     {
         SetBackground(rgbColor);
     }
-}
-
-bool TextAttribute::IsLeadingByte() const noexcept
-{
-    return WI_IsFlagSet(_wAttrLegacy, COMMON_LVB_LEADING_BYTE);
-}
-
-bool TextAttribute::IsTrailingByte() const noexcept
-{
-    return WI_IsFlagSet(_wAttrLegacy, COMMON_LVB_LEADING_BYTE);
-}
-
-bool TextAttribute::IsTopHorizontalDisplayed() const noexcept
-{
-    return WI_IsFlagSet(_wAttrLegacy, COMMON_LVB_GRID_HORIZONTAL);
-}
-
-bool TextAttribute::IsBottomHorizontalDisplayed() const noexcept
-{
-    return WI_IsFlagSet(_wAttrLegacy, COMMON_LVB_UNDERSCORE);
-}
-
-bool TextAttribute::IsLeftVerticalDisplayed() const noexcept
-{
-    return WI_IsFlagSet(_wAttrLegacy, COMMON_LVB_GRID_LVERTICAL);
-}
-
-bool TextAttribute::IsRightVerticalDisplayed() const noexcept
-{
-    return WI_IsFlagSet(_wAttrLegacy, COMMON_LVB_GRID_RVERTICAL);
 }
 
 void TextAttribute::SetLeftVerticalDisplayed(const bool isDisplayed) noexcept

@@ -86,6 +86,9 @@ public:
 
     virtual bool SetGraphicsRendition(const std::basic_string_view<DispatchTypes::GraphicsOptions> options) = 0; // SGR
 
+    virtual bool PushGraphicsRendition(const std::basic_string_view<::Microsoft::Console::VirtualTerminal::DispatchTypes::SgrSaveRestoreStackOptions> options) = 0; // XTPUSHSGR
+    virtual bool PopGraphicsRendition() = 0; // XTPOPSGR
+
     virtual bool SetPrivateModes(const std::basic_string_view<DispatchTypes::PrivateModeParams> params) = 0; // DECSET
 
     virtual bool ResetPrivateModes(const std::basic_string_view<DispatchTypes::PrivateModeParams> params) = 0; // DECRST

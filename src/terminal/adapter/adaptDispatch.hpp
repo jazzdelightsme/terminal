@@ -19,6 +19,7 @@ Author(s):
 #include "conGetSet.hpp"
 #include "adaptDefaults.hpp"
 #include "terminalOutput.hpp"
+#include "..\..\types\inc\sgrStack.hpp"
 
 namespace Microsoft::Console::VirtualTerminal
 {
@@ -56,6 +57,8 @@ namespace Microsoft::Console::VirtualTerminal
         bool InsertCharacter(const size_t count) override; // ICH
         bool DeleteCharacter(const size_t count) override; // DCH
         bool SetGraphicsRendition(const std::basic_string_view<DispatchTypes::GraphicsOptions> options) override; // SGR
+        bool PushGraphicsRendition(const std::basic_string_view<::Microsoft::Console::VirtualTerminal::DispatchTypes::SgrSaveRestoreStackOptions> options) override; // XTPUSHSGR
+        bool PopGraphicsRendition() override; // XTPOPSGR
         bool DeviceStatusReport(const DispatchTypes::AnsiStatusType statusType) override; // DSR, DSR-OS, DSR-CPR
         bool DeviceAttributes() override; // DA1
         bool ScrollUp(const size_t distance) override; // SU
@@ -175,6 +178,8 @@ namespace Microsoft::Console::VirtualTerminal
         bool _isOriginModeRelative;
 
         bool _isDECCOLMAllowed;
+
+        SgrStack _sgrStack;
 
         size_t _SetRgbColorsHelper(const std::basic_string_view<DispatchTypes::GraphicsOptions> options,
                                    TextAttribute& attr,

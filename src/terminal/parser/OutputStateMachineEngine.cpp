@@ -551,6 +551,9 @@ bool OutputStateMachineEngine::ActionCsiDispatch(const wchar_t wch,
         case L' ':
             success = _IntermediateSpaceDispatch(wch, parameters);
             break;
+        case L'#':
+            success = _IntermediateHashDispatch(wch, parameters);
+            break;
         default:
             // If no functions to call, overall dispatch was a failure.
             success = false;
@@ -587,7 +590,7 @@ bool OutputStateMachineEngine::_IntermediateQuestionMarkDispatch(const wchar_t w
     {
     case VTActionCodes::DECSET_PrivateModeSet:
     case VTActionCodes::DECRST_PrivateModeReset:
-        success = _GetPrivateModeParams(parameters, privateModeParams);
+        success = _GetTypedParams(parameters, privateModeParams);
         break;
 
     default:
@@ -682,6 +685,66 @@ bool OutputStateMachineEngine::_IntermediateSpaceDispatch(const wchar_t wchActio
         }
     }
 
+    return success;
+}
+
+// Routine Description:
+// - Handles actions that have an intermediate '#' (0x23), such as XTPUSHSGR, XTPOPSGR
+// Arguments:
+// - wch - Character to dispatch.
+// Return Value:
+// - True if handled successfully. False otherwise.
+bool OutputStateMachineEngine::_IntermediateHashDispatch(const wchar_t wchAction,
+                                                         const std::basic_string_view<size_t> parameters)
+{
+    bool success = false;
+
+    std::vector<DispatchTypes::SgrSaveRestoreStackOptions> pushPopParams;
+
+    // Ensure that there was the right number of params
+    switch (wchAction)
+    {
+    case VTActionCodes::XT_PushSgr:
+    case VTActionCodes::XT_PushSgrAlias:
+        success = _GetTypedParams(parameters, pushPopParams);
+        break;
+
+    case VTActionCodes::XT_PopSgr:
+    case VTActionCodes::XT_PopSgrAlias:
+        if (parameters.size() == 0)
+        {
+            // Can't supply params for XTPOPSGR.
+            success = true;
+        }
+        break;
+
+    default:
+        // If no params to fill, param filling was successful.
+        success = true;
+        break;
+    }
+    if (success)
+    {
+        switch (wchAction)
+        {
+        case VTActionCodes::XT_PushSgr:
+        case VTActionCodes::XT_PushSgrAlias:
+            success = _dispatch->PushGraphicsRendition({ pushPopParams.data(), pushPopParams.size() });
+            TermTelemetry::Instance().Log(TermTelemetry::Codes::XTPUSHSGR);
+            break;
+
+        case VTActionCodes::XT_PopSgr:
+        case VTActionCodes::XT_PopSgrAlias:
+            success = _dispatch->PopGraphicsRendition();
+            TermTelemetry::Instance().Log(TermTelemetry::Codes::XTPOPSGR);
+            break;
+
+        default:
+            // If no functions to call, overall dispatch was a failure.
+            success = false;
+            break;
+        }
+    }
     return success;
 }
 
@@ -1092,6 +1155,7 @@ bool OutputStateMachineEngine::_GetTopBottomMargins(const std::basic_string_view
     }
     return success;
 }
+
 // Routine Description:
 // - Retrieves the status type parameter for an upcoming device query operation
 // Arguments:
@@ -1128,23 +1192,52 @@ bool OutputStateMachineEngine::_GetDeviceStatusOperation(const std::basic_string
 }
 
 // Routine Description:
-// - Retrieves the listed private mode params be set/reset by DECSET/DECRST
+// - Converts the untyped array of numeric parameters into an array of the specified type.
 // Arguments:
 // - parameters - The parameters to parse
-// - privateModes - Space that will be filled with valid params from the PrivateModeParams enum
+// - typedParams - Space that will be filled with valid params from the TParamType enum
 // Return Value:
-// - True if we successfully retrieved an array of private mode params from the parameters we've stored. False otherwise.
-bool OutputStateMachineEngine::_GetPrivateModeParams(const std::basic_string_view<size_t> parameters,
-                                                     std::vector<DispatchTypes::PrivateModeParams>& privateModes) const
+// - True if we successfully retrieved an array of strongly-typed params from the
+//   parameters we've stored. False otherwise.
+template<typename TParamType, bool bIgnoreNarrowingConversionFailures>
+bool OutputStateMachineEngine::_GetTypedParams(const std::basic_string_view<size_t> parameters,
+                                               std::vector<TParamType>& typedParams) const
 {
     bool success = false;
-    // Can't just set nothing at all
     if (parameters.size() > 0)
     {
         for (const auto& p : parameters)
         {
-            privateModes.push_back((DispatchTypes::PrivateModeParams)p);
+            // No memcpy. The parameters are size_t. The type we are converting to may be
+            // a different size.
+            //
+            // Note that we use gsl::narrow_cast, not gsl::narrow, because we don't want
+            // someone to be able to shove a too-big number in and cause a crash. Instead,
+            // we will detect truncation after the fact, and ignore the parameter if that
+            // happened. And by "ignore the parameter", we mean it won't even be put into
+            // typedParams (as opposed to, say, entering a 0, which may have some
+            // meaning). The caller can check this, if desired, by checking if the number
+            // of parameters they passed in equals the number of parameters they got out.
+            TParamType tmp = gsl::narrow_cast<TParamType>(p);
+            if (gsl::narrow_cast<size_t>(tmp) == p)
+            {
+                typedParams.push_back(tmp);
+            }
+            else if (bIgnoreNarrowingConversionFailures)
+            {
+                // we ignore the parameter
+            }
+            else
+            {
+                success = false;
+                break;
+            }
         }
+
+        success = true;
+    }
+    else
+    {
         success = true;
     }
     return success;

@@ -2384,6 +2384,7 @@ tosign
 touchpad
 towlower
 towupper
+TParam
 Tpp
 Tpqrst
 tprivapi
@@ -2812,6 +2813,8 @@ XSubstantial
 xtended
 xterm
 XTest
+XTPUSHSGR
+XTPOPSGR
 xutr
 xvalue
 XVIRTUALSCREEN

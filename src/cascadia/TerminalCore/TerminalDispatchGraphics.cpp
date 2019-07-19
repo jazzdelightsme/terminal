@@ -324,3 +324,13 @@ bool TerminalDispatch::SetGraphicsRendition(const std::basic_string_view<Dispatc
     }
     return success;
 }
+
+bool TerminalDispatch::PushGraphicsRendition(const std::basic_string_view<::Microsoft::Console::VirtualTerminal::DispatchTypes::SgrSaveRestoreStackOptions> options) noexcept
+{
+    return _terminalApi.PushGraphicsRendition(options);
+}
+
+bool TerminalDispatch::PopGraphicsRendition() noexcept
+{
+    return _terminalApi.PopGraphicsRendition();
+}

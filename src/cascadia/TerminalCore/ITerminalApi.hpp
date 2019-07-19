@@ -58,6 +58,9 @@ namespace Microsoft::Terminal::Core
 
         virtual bool IsVtInputEnabled() const = 0;
 
+        virtual bool PushGraphicsRendition(const std::basic_string_view<::Microsoft::Console::VirtualTerminal::DispatchTypes::SgrSaveRestoreStackOptions> options) noexcept = 0;
+        virtual bool PopGraphicsRendition() noexcept = 0;
+
     protected:
         ITerminalApi() = default;
     };

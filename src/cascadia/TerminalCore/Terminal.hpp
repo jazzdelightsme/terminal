@@ -6,6 +6,7 @@
 #include <conattrs.hpp>
 
 #include "../../buffer/out/textBuffer.hpp"
+#include "../../types/inc/sgrStack.hpp"
 #include "../../renderer/inc/IRenderData.hpp"
 #include "../../terminal/parser/StateMachine.hpp"
 #include "../../terminal/input/terminalInput.hpp"
@@ -111,6 +112,10 @@ public:
     bool EnableAlternateScrollMode(const bool enabled) noexcept override;
 
     bool IsVtInputEnabled() const noexcept override;
+
+    bool PushGraphicsRendition(const std::basic_string_view<::Microsoft::Console::VirtualTerminal::DispatchTypes::SgrSaveRestoreStackOptions> options) noexcept override;
+    bool PopGraphicsRendition() noexcept override;
+
 #pragma endregion
 
 #pragma region ITerminalInput
@@ -292,6 +297,8 @@ private:
     std::pair<COORD, COORD> _ExpandSelectionAnchors(std::pair<COORD, COORD> anchors) const;
     COORD _ConvertToBufferCell(const COORD viewportPos) const;
 #pragma endregion
+
+    Microsoft::Console::VirtualTerminal::SgrStack _sgrStack;
 
 #ifdef UNIT_TESTING
     friend class TerminalCoreUnitTests::TerminalBufferTests;

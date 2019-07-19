@@ -97,6 +97,9 @@ public:
                                     COLORREF defaultFgColor,
                                     COLORREF defaultBgColor) const noexcept;
 
+    void SetForegroundFrom(const TextAttribute& other) noexcept;
+    void SetBackgroundFrom(const TextAttribute& other) noexcept;
+
     bool IsLeadingByte() const noexcept;
     bool IsTrailingByte() const noexcept;
     bool IsTopHorizontalDisplayed() const noexcept;

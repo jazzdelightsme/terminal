@@ -15,6 +15,9 @@ public:
 
     bool SetGraphicsRendition(const std::basic_string_view<::Microsoft::Console::VirtualTerminal::DispatchTypes::GraphicsOptions> options) noexcept override;
 
+    bool PushGraphicsRendition(const std::basic_string_view<::Microsoft::Console::VirtualTerminal::DispatchTypes::SgrSaveRestoreStackOptions> options) noexcept override;
+    bool PopGraphicsRendition() noexcept override;
+
     bool CursorPosition(const size_t line,
                         const size_t column) noexcept override; // CUP
 

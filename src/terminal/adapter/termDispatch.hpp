@@ -80,6 +80,9 @@ public:
 
     bool SetGraphicsRendition(const std::basic_string_view<DispatchTypes::GraphicsOptions> /*options*/) noexcept override { return false; } // SGR
 
+    bool PushGraphicsRendition(const std::basic_string_view<::Microsoft::Console::VirtualTerminal::DispatchTypes::SgrSaveRestoreStackOptions> /*options*/) noexcept override { return false; } // XTPUSHSGR
+    bool PopGraphicsRendition() noexcept override { return false; } // XTPOPSGR
+
     bool SetPrivateModes(const std::basic_string_view<DispatchTypes::PrivateModeParams> /*params*/) noexcept override { return false; } // DECSET
 
     bool ResetPrivateModes(const std::basic_string_view<DispatchTypes::PrivateModeParams> /*params*/) noexcept override { return false; } // DECRST
