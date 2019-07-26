@@ -701,12 +701,17 @@ public:
         return _fPrivateGetConsoleScreenBufferLegacyAttributesResult;
     }
 
-    void PrivateGetConsoleScreenBufferAttributes(_Out_ TextAttribute& attributes) override
+    BOOL PrivateGetConsoleScreenBufferAttributes(_Out_ TextAttribute* const pAttributes) override
     {
         Log::Comment(L"PrivateGetConsoleScreenBufferAttributes MOCK returning data...");
 
-        // TODO
-        attributes = TextAttribute();
+        if (pAttributes != nullptr && _fPrivateGetConsoleScreenBufferAttributesResult)
+        {
+            // TODO
+            *pAttributes = TextAttribute();
+        }
+
+        return _fPrivateGetConsoleScreenBufferAttributesResult;
     }
 
     BOOL PrivateRefreshWindow() override
@@ -880,6 +885,7 @@ public:
         _fScrollConsoleScreenBufferWResult = TRUE;
         _fSetConsoleWindowInfoResult = TRUE;
         _fPrivateGetConsoleScreenBufferLegacyAttributesResult = TRUE;
+        _fPrivateGetConsoleScreenBufferAttributesResult = TRUE;
         _fMoveToBottomResult = true;
 
         _PrepCharsBuffer(wch, wAttr);
@@ -1403,6 +1409,7 @@ public:
     BOOL _fSetConsoleRGBTextAttributeResult = false;
     BOOL _fPrivateSetLegacyAttributesResult = false;
     BOOL _fPrivateGetConsoleScreenBufferLegacyAttributesResult = false;
+    BOOL _fPrivateGetConsoleScreenBufferAttributesResult = false;
     BOOL _fSetCursorStyleResult = false;
     CursorType _ExpectedCursorStyle;
     BOOL _fSetCursorColorResult = false;

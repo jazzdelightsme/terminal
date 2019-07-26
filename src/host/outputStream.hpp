@@ -133,7 +133,7 @@ public:
     BOOL PrivateEraseAll() override;
 
     BOOL PrivateGetConsoleScreenBufferLegacyAttributes(_Out_ WORD* const pwAttributes) override;
-    void PrivateGetConsoleScreenBufferAttributes(_Out_ TextAttribute& attributes) override;
+    BOOL PrivateGetConsoleScreenBufferAttributes(_Out_ TextAttribute* const pAttributes) override;
 
     BOOL PrivatePrependConsoleInput(_Inout_ std::deque<std::unique_ptr<IInputEvent>>& events,
                                     _Out_ size_t& eventsWritten) override;

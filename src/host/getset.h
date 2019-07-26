@@ -70,7 +70,8 @@ void DoSrvSetCursorColor(SCREEN_INFORMATION& screenInfo,
 
 [[nodiscard]] NTSTATUS DoSrvPrivateGetConsoleScreenBufferLegacyAttributes(const SCREEN_INFORMATION& screenInfo,
                                                                           _Out_ WORD* const pwAttributes);
-void DoSrvPrivateGetConsoleScreenBufferAttributes(_In_ const SCREEN_INFORMATION& screenInfo, TextAttribute& attributes);
+[[nodiscard]] NTSTATUS DoSrvPrivateGetConsoleScreenBufferAttributes(_In_ const SCREEN_INFORMATION& screenInfo,
+                                                                    _Out_ TextAttribute* const pAttributes);
 
 void DoSrvPrivateRefreshWindow(const SCREEN_INFORMATION& screenInfo);
 

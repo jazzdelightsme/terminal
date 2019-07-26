@@ -1668,9 +1668,31 @@ void DoSrvSetCursorColor(SCREEN_INFORMATION& screenInfo,
     return Status;
 }
 
-void DoSrvPrivateGetConsoleScreenBufferAttributes(_In_ const SCREEN_INFORMATION& screenInfo, TextAttribute& attributes)
+// Routine Description:
+// - A private API call to get only the default text attributes of the screen buffer.
+// - This is used as a performance optimization by the VT adapter in SGR-related code (Set Graphics Rendition)
+//   instead of calling for this information through the public API GetConsoleScreenBufferInfoEx which returns
+//   a lot of extra unnecessary data and takes a lot of extra processing time.
+// Parameters
+// - screenInfo - The screen buffer to retrieve default text attributes information from
+// - pwAttributes - Pointer to space that will receive text attributes data
+// Return Value:
+// - STATUS_SUCCESS if we succeeded or STATUS_INVALID_PARAMETER for bad params (nullptr).
+[[nodiscard]] NTSTATUS DoSrvPrivateGetConsoleScreenBufferAttributes(_In_ const SCREEN_INFORMATION& screenInfo, _Out_ TextAttribute* const pAttributes)
 {
-    attributes = screenInfo.GetActiveBuffer().GetAttributes();
+    NTSTATUS Status = STATUS_SUCCESS;
+
+    if (pAttributes == nullptr)
+    {
+        Status = STATUS_INVALID_PARAMETER;
+    }
+
+    if (NT_SUCCESS(Status))
+    {
+        *pAttributes = screenInfo.GetActiveBuffer().GetAttributes();
+    }
+
+    return Status;
 }
 
 

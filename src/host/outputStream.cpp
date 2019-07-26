@@ -635,15 +635,15 @@ BOOL ConhostInternalGetSet::PrivateGetConsoleScreenBufferLegacyAttributes(_Out_ 
 }
 
 // Routine Description:
-// - Retrieves the default color attributes information for the active screen buffer.
-// - This function is used to optimize SGR calls in lieu of calling GetConsoleScreenBufferInfoEx.
+// - Retrieves the default text attributes information for the active screen buffer.
+// - Similar to PrivateGetConsoleScreenBufferLegacyAttributes, but gets the full attributes.
 // Arguments:
-// - pAttributes - Pointer to space to receive color attributes data
+// - pAttributes - Pointer to space to receive attributes data
 // Return Value:
 // - TRUE if successful. FALSE otherwise.
-void ConhostInternalGetSet::PrivateGetConsoleScreenBufferAttributes(_Out_ TextAttribute& attributes)
+BOOL ConhostInternalGetSet::PrivateGetConsoleScreenBufferAttributes(_Out_ TextAttribute* const pAttributes)
 {
-    DoSrvPrivateGetConsoleScreenBufferAttributes(_io.GetActiveOutputBuffer(), attributes);
+    return NT_SUCCESS(DoSrvPrivateGetConsoleScreenBufferAttributes(_io.GetActiveOutputBuffer(), pAttributes));
 }
 
 // Routine Description:
