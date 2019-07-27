@@ -291,6 +291,16 @@ public:
         return _fPrivateSetLegacyAttributesResult;
     }
 
+    BOOL PrivateSetAttributes(const TextAttribute& attributes) override
+    {
+        Log::Comment(L"PrivateSetAttributes MOCK called...");
+
+        // TODO
+        UNREFERENCED_PARAMETER(attributes);
+
+        return TRUE;
+    }
+
     BOOL SetConsoleXtermTextAttribute(const int iXtermTableEntry, const bool fIsForeground) override
     {
         Log::Comment(L"SetConsoleXtermTextAttribute MOCK called...");

@@ -78,6 +78,8 @@ public:
                                     const bool fBackground,
                                     const bool fMeta) override;
 
+    BOOL PrivateSetAttributes(const TextAttribute& attributes) override;
+
     BOOL PrivateSetDefaultAttributes(const bool fForeground,
                                      const bool fBackground) override;
 

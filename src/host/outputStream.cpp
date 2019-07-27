@@ -239,6 +239,12 @@ BOOL ConhostInternalGetSet::PrivateSetLegacyAttributes(const WORD wAttr,
     return TRUE;
 }
 
+BOOL ConhostInternalGetSet::PrivateSetAttributes(const TextAttribute& attributes)
+{
+    DoSrvPrivateSetAttributes(_io.GetActiveOutputBuffer(), attributes);
+    return TRUE;
+}
+
 // Routine Description:
 // - Sets the current attributes of the screen buffer to use the color table entry specified by
 //     the iXtermTableEntry. Sets either the FG or the BG component of the attributes.

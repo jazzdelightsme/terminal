@@ -25,6 +25,9 @@ void DoSrvPrivateSetLegacyAttributes(SCREEN_INFORMATION& screenInfo,
                                      const bool fBackground,
                                      const bool fMeta);
 
+void DoSrvPrivateSetAttributes(SCREEN_INFORMATION& screenInfo,
+                               const TextAttribute& Attributes);
+
 void DoSrvPrivateSetDefaultAttributes(SCREEN_INFORMATION& screenInfo, const bool fForeground, const bool fBackground);
 
 [[nodiscard]] NTSTATUS DoSrvPrivateSetCursorKeysMode(_In_ bool fApplicationMode);

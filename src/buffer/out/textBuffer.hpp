@@ -119,7 +119,7 @@ public:
 
     [[nodiscard]] TextAttribute GetCurrentAttributes() const noexcept;
 
-    void SetCurrentAttributes(const TextAttribute currentAttributes) noexcept;
+    void SetCurrentAttributes(const TextAttribute& currentAttributes) noexcept;
 
     void Reset();
 

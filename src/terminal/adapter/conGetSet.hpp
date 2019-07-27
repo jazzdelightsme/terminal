@@ -47,6 +47,8 @@ namespace Microsoft::Console::VirtualTerminal
                                                 const bool fBackground,
                                                 const bool fMeta) = 0;
 
+        virtual BOOL PrivateSetAttributes(const TextAttribute& attributes) = 0;
+
         virtual BOOL PrivateSetDefaultAttributes(const bool fForeground, const bool fBackground) = 0;
 
         virtual BOOL SetConsoleXtermTextAttribute(const int iXtermTableEntry,

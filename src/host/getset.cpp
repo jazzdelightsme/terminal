@@ -896,6 +896,13 @@ void DoSrvPrivateSetLegacyAttributes(SCREEN_INFORMATION& screenInfo,
     buffer.SetAttributes(NewAttributes);
 }
 
+void DoSrvPrivateSetAttributes(SCREEN_INFORMATION& screenInfo,
+                               const TextAttribute& Attributes)
+{
+    auto& buffer = screenInfo.GetActiveBuffer();
+    buffer.SetAttributes(Attributes);
+}
+
 void DoSrvPrivateSetDefaultAttributes(SCREEN_INFORMATION& screenInfo,
                                       const bool fForeground,
                                       const bool fBackground)
@@ -1694,7 +1701,6 @@ void DoSrvSetCursorColor(SCREEN_INFORMATION& screenInfo,
 
     return Status;
 }
-
 
 // Routine Description:
 // - A private API call for forcing the renderer to repaint the screen. If the
