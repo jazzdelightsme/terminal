@@ -18,7 +18,7 @@ COLORREF TextAttribute::CalculateRgbForeground(std::basic_string_view<COLORREF> 
                                                COLORREF defaultFgColor,
                                                COLORREF defaultBgColor) const
 {
-    return _IsReverseVideo() ? _GetRgbBackground(colorTable, defaultBgColor) : _GetRgbForeground(colorTable, defaultFgColor);
+    return IsReverseVideo() ? _GetRgbBackground(colorTable, defaultBgColor) : _GetRgbForeground(colorTable, defaultFgColor);
 }
 
 // Routine Description:
@@ -31,7 +31,33 @@ COLORREF TextAttribute::CalculateRgbBackground(std::basic_string_view<COLORREF> 
                                                COLORREF defaultFgColor,
                                                COLORREF defaultBgColor) const
 {
-    return _IsReverseVideo() ? _GetRgbForeground(colorTable, defaultFgColor) : _GetRgbBackground(colorTable, defaultBgColor);
+    return IsReverseVideo() ? _GetRgbForeground(colorTable, defaultFgColor) : _GetRgbBackground(colorTable, defaultBgColor);
+}
+
+// Routine Description:
+// - Makes this TextAttribute's foreground color the same as the other one.
+// Arguments:
+// - The TextAttribute to copy the foreground color from
+// Return Value:
+// - <none>
+void TextAttribute::SetForegroundFrom(const TextAttribute& other) noexcept
+{
+    _foreground = other._foreground;
+    WI_ClearAllFlags(_wAttrLegacy, FG_ATTRS);
+    _wAttrLegacy |= (other._wAttrLegacy & FG_ATTRS);
+}
+
+// Routine Description:
+// - Makes this TextAttribute's background color the same as the other one.
+// Arguments:
+// - The TextAttribute to copy the background color from
+// Return Value:
+// - <none>
+void TextAttribute::SetBackgroundFrom(const TextAttribute& other) noexcept
+{
+    _background = other._background;
+    WI_ClearAllFlags(_wAttrLegacy, BG_ATTRS);
+    _wAttrLegacy |= (other._wAttrLegacy & BG_ATTRS);
 }
 
 // Routine Description:
@@ -160,7 +186,12 @@ bool TextAttribute::IsBold() const noexcept
     return _isBold;
 }
 
-bool TextAttribute::_IsReverseVideo() const noexcept
+bool TextAttribute::IsUnderline() const noexcept
+{
+    return IsBottomHorizontalDisplayed();
+}
+
+bool TextAttribute::IsReverseVideo() const noexcept
 {
     return WI_IsFlagSet(_wAttrLegacy, COMMON_LVB_REVERSE_VIDEO);
 }
@@ -195,14 +226,19 @@ bool TextAttribute::IsRightVerticalDisplayed() const noexcept
     return WI_IsFlagSet(_wAttrLegacy, COMMON_LVB_GRID_RVERTICAL);
 }
 
-void TextAttribute::SetLeftVerticalDisplayed(const bool isDisplayed) noexcept
+void TextAttribute::SetLeftVerticalDisplayed(bool isDisplayed) noexcept
 {
     WI_UpdateFlag(_wAttrLegacy, COMMON_LVB_GRID_LVERTICAL, isDisplayed);
 }
 
-void TextAttribute::SetRightVerticalDisplayed(const bool isDisplayed) noexcept
+void TextAttribute::SetRightVerticalDisplayed(bool isDisplayed) noexcept
 {
     WI_UpdateFlag(_wAttrLegacy, COMMON_LVB_GRID_RVERTICAL, isDisplayed);
+}
+
+void TextAttribute::SetBottomHorizontalDisplayed(bool isDisplayed) noexcept
+{
+    WI_UpdateFlag(_wAttrLegacy, COMMON_LVB_UNDERSCORE, isDisplayed);
 }
 
 void TextAttribute::Embolden() noexcept
@@ -213,6 +249,16 @@ void TextAttribute::Embolden() noexcept
 void TextAttribute::Debolden() noexcept
 {
     _SetBoldness(false);
+}
+
+void TextAttribute::EnableUnderline() noexcept
+{
+    SetBottomHorizontalDisplayed(true);
+}
+
+void TextAttribute::DisableUnderline() noexcept
+{
+    SetBottomHorizontalDisplayed(false);
 }
 
 // Routine Description:
