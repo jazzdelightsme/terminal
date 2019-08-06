@@ -97,6 +97,9 @@ public:
                                     COLORREF defaultFgColor,
                                     COLORREF defaultBgColor) const noexcept;
 
+    void SetForegroundFrom(const TextAttribute& other) noexcept;
+    void SetBackgroundFrom(const TextAttribute& other) noexcept;
+
     bool IsLeadingByte() const noexcept;
     bool IsTrailingByte() const noexcept;
     bool IsTopHorizontalDisplayed() const noexcept;
@@ -104,8 +107,9 @@ public:
     bool IsLeftVerticalDisplayed() const noexcept;
     bool IsRightVerticalDisplayed() const noexcept;
 
-    void SetLeftVerticalDisplayed(const bool isDisplayed) noexcept;
-    void SetRightVerticalDisplayed(const bool isDisplayed) noexcept;
+    void SetLeftVerticalDisplayed(bool isDisplayed) noexcept;
+    void SetRightVerticalDisplayed(bool isDisplayed) noexcept;
+    void SetBottomHorizontalDisplayed(bool isDisplayed) noexcept;
 
     void SetFromLegacy(const WORD wLegacy) noexcept;
 
@@ -122,6 +126,8 @@ public:
 
     void Embolden() noexcept;
     void Debolden() noexcept;
+    void EnableUnderline() noexcept;
+    void DisableUnderline() noexcept;
 
     void Invert() noexcept;
 
@@ -138,6 +144,9 @@ public:
     {
         return WI_IsFlagSet(_extendedAttrs, ExtendedAttributes::Bold);
     }
+
+    bool IsUnderline() const noexcept;
+    bool IsReverseVideo() const noexcept;
 
     constexpr ExtendedAttributes GetExtendedAttributes() const noexcept
     {
@@ -168,7 +177,6 @@ private:
                                COLORREF defaultColor) const noexcept;
     COLORREF _GetRgbBackground(std::basic_string_view<COLORREF> colorTable,
                                COLORREF defaultColor) const noexcept;
-    bool _IsReverseVideo() const noexcept;
     void _SetBoldness(const bool isBold) noexcept;
 
     WORD _wAttrLegacy;
