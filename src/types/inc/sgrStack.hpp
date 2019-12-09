@@ -65,7 +65,9 @@ namespace Microsoft::Console::VirtualTerminal
                                                     uint32_t validParts) noexcept; // of savedAttribute
 
         int _numSgrPushes; // used as an index into the following arrays
-        TextAttribute _storedSgrAttributes[c_MaxStoredSgrPushes];
-        uint32_t _validAttributes[c_MaxStoredSgrPushes]; // flags that indicate which portions of the attributes are valid
+        std::array<TextAttribute, c_MaxStoredSgrPushes> _storedSgrAttributes;
+        std::array<uint32_t, c_MaxStoredSgrPushes> _validAttributes;
+        //TextAttribute _storedSgrAttributes[c_MaxStoredSgrPushes];
+        //uint32_t _validAttributes[c_MaxStoredSgrPushes]; // flags that indicate which portions of the attributes are valid
     };
 }
