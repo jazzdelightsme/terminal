@@ -19,7 +19,7 @@ Author(s):
 #include "conGetSet.hpp"
 #include "adaptDefaults.hpp"
 #include "terminalOutput.hpp"
-#include "..\..\buffer\out\sgrStack.hpp"
+#include "..\..\types\inc\sgrStack.hpp"
 #include <math.h>
 
 namespace Microsoft::Console::VirtualTerminal
