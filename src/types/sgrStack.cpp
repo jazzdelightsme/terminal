@@ -8,9 +8,7 @@ namespace Microsoft::Console::VirtualTerminal
 {
 
 SgrStack::SgrStack() noexcept :
-    _numSgrPushes{ 0 },
-    _validAttributes{ 0 },
-    _storedSgrAttributes{ 0 }
+    _numSgrPushes{ 0 }
 {
 }
 
@@ -37,17 +35,10 @@ void SgrStack::Push(const TextAttribute& currentAttributes,
         }
     }
 
-    if (_numSgrPushes < _countof(_storedSgrAttributes))
+    if (_numSgrPushes < _storedSgrAttributes.size())
     {
-// Must disable 26482 "Only index into arrays using constant expressions" because we are
-// implementing a stack, and that's the whole point.
-// We also disable the warning for using gsl::at, because doing that yields another: "No
-// array to pointer decay".
-#pragma warning(push)
-#pragma warning(disable : 26482 26446)
         _storedSgrAttributes[_numSgrPushes] = currentAttributes;
         _validAttributes[_numSgrPushes] = validParts;
-#pragma warning(pop)
     }
 
     if (_numSgrPushes < c_MaxBalancedPushes)
@@ -62,14 +53,8 @@ const TextAttribute SgrStack::Pop(const TextAttribute& currentAttributes) noexce
     {
         _numSgrPushes--;
 
-        if (_numSgrPushes < _countof(_storedSgrAttributes))
+        if (_numSgrPushes < _storedSgrAttributes.size())
         {
-// Must disable 26482 "Only index into arrays using constant expressions" because we are
-// implementing a stack, and that's the whole point.
-// We also disable the warning for using gsl::at, because doing that yields another: "No
-// array to pointer decay".
-#pragma warning(push)
-#pragma warning(disable : 26482 26446)
             const uint32_t validParts = _validAttributes[_numSgrPushes];
 
             if (validParts == UINT32_MAX)
@@ -82,7 +67,6 @@ const TextAttribute SgrStack::Pop(const TextAttribute& currentAttributes) noexce
                                                      _storedSgrAttributes[_numSgrPushes],
                                                      validParts);
             }
-#pragma warning(pop)
         }
     }
 
