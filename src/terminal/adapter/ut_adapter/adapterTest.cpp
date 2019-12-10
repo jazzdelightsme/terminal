@@ -219,19 +219,6 @@ public:
         return _fPrivateSetLegacyAttributesResult;
     }
 
-    BOOL PrivateSetAttributes(const TextAttribute& attributes) override
-    {
-        Log::Comment(L"PrivateSetAttributes MOCK called...");
-
-        if (_fPrivateSetAttributesResult)
-        {
-            VERIFY_ARE_EQUAL(_expectedAttribute, attributes);
-            _attribute = attributes;
-        }
-
-        return _fPrivateSetAttributesResult;
-    }
-
     BOOL SetConsoleXtermTextAttribute(const int iXtermTableEntry, const bool fIsForeground) override
     {
         Log::Comment(L"SetConsoleXtermTextAttribute MOCK called...");
@@ -300,16 +287,28 @@ public:
         return true;
     }
 
-    BOOL PrivateGetTextAttributes(TextAttribute* const /*pAttrs*/) const
+    BOOL PrivateGetTextAttributes(TextAttribute* const pAttributes) const
     {
         Log::Comment(L"PrivateGetTextAttributes MOCK called...");
-        return true;
+
+        if (pAttributes != nullptr && _fPrivateGetTextAttributesResult)
+        {
+            *pAttributes = _attribute;
+        }
+
+        return _fPrivateGetTextAttributesResult;
     }
 
-    BOOL PrivateSetTextAttributes(const TextAttribute& /*attrs*/)
+    BOOL PrivateSetTextAttributes(const TextAttribute& attributes)
     {
         Log::Comment(L"PrivateSetTextAttributes MOCK called...");
-        return true;
+        if (_fPrivateSetTextAttributesResult)
+        {
+            VERIFY_ARE_EQUAL(_expectedAttribute, attributes);
+            _attribute = attributes;
+        }
+
+        return _fPrivateSetTextAttributesResult;
     }
 
     BOOL PrivateWriteConsoleInputW(_Inout_ std::deque<std::unique_ptr<IInputEvent>>& events,
@@ -557,18 +556,6 @@ public:
         return _fPrivateGetConsoleScreenBufferLegacyAttributesResult;
     }
 
-    BOOL PrivateGetConsoleScreenBufferAttributes(_Out_ TextAttribute* const pAttributes) override
-    {
-        Log::Comment(L"PrivateGetConsoleScreenBufferAttributes MOCK returning data...");
-
-        if (pAttributes != nullptr && _fPrivateGetConsoleScreenBufferAttributesResult)
-        {
-            *pAttributes = _attribute;
-        }
-
-        return _fPrivateGetConsoleScreenBufferAttributesResult;
-    }
-
     BOOL PrivateRefreshWindow() override
     {
         Log::Comment(L"PrivateRefreshWindow MOCK called...");
@@ -736,7 +723,7 @@ public:
         _fPrivateWriteConsoleControlInputResult = TRUE;
         _fSetConsoleWindowInfoResult = TRUE;
         _fPrivateGetConsoleScreenBufferLegacyAttributesResult = TRUE;
-        _fPrivateGetConsoleScreenBufferAttributesResult = TRUE;
+        _fPrivateGetTextAttributesResult = TRUE;
         _fMoveToBottomResult = true;
 
         _coordBufferSize.X = 100;
@@ -929,9 +916,9 @@ public:
     BOOL _fSetConsoleXtermTextAttributeResult = false;
     BOOL _fSetConsoleRGBTextAttributeResult = false;
     BOOL _fPrivateSetLegacyAttributesResult = false;
-    BOOL _fPrivateSetAttributesResult = false;
+    BOOL _fPrivateSetTextAttributesResult = false;
     BOOL _fPrivateGetConsoleScreenBufferLegacyAttributesResult = false;
-    BOOL _fPrivateGetConsoleScreenBufferAttributesResult = false;
+    BOOL _fPrivateGetTextAttributesResult = false;
     BOOL _fSetCursorStyleResult = false;
     CursorType _ExpectedCursorStyle;
     BOOL _fSetCursorColorResult = false;
@@ -1822,8 +1809,8 @@ public:
         cOptions = 0;
         VERIFY_IS_TRUE(_pDispatch->PushGraphicsRendition(rgOptions, cOptions));
 
-        _testGetSet->_fPrivateGetConsoleScreenBufferAttributesResult = true;
-        _testGetSet->_fPrivateSetAttributesResult = true;
+        _testGetSet->_fPrivateGetTextAttributesResult = true;
+        _testGetSet->_fPrivateSetTextAttributesResult = true;
         _testGetSet->_expectedAttribute.SetDefaultBackground();
         _testGetSet->_expectedAttribute.SetDefaultForeground();
         VERIFY_IS_TRUE(_pDispatch->PopGraphicsRendition());
@@ -1841,8 +1828,8 @@ public:
         VERIFY_IS_TRUE(_pDispatch->SetGraphicsRendition(rgOptions, cOptions));
 
         cOptions = 0;
-        _testGetSet->_fPrivateGetConsoleScreenBufferAttributesResult = true;
-        _testGetSet->_fPrivateSetAttributesResult = true;
+        _testGetSet->_fPrivateGetTextAttributesResult = true;
+        _testGetSet->_fPrivateSetTextAttributesResult = true;
         _testGetSet->_expectedAttribute.SetDefaultBackground();
         _testGetSet->_expectedAttribute.SetDefaultForeground();
         VERIFY_IS_TRUE(_pDispatch->PopGraphicsRendition());
@@ -1874,8 +1861,8 @@ public:
 
         // First pop:
         cOptions = 0;
-        _testGetSet->_fPrivateGetConsoleScreenBufferAttributesResult = true;
-        _testGetSet->_fPrivateSetAttributesResult = true;
+        _testGetSet->_fPrivateGetTextAttributesResult = true;
+        _testGetSet->_fPrivateSetTextAttributesResult = true;
         _testGetSet->_expectedAttribute.SetFromLegacy(FOREGROUND_RED);
         // Q: The verification of the original SGR doesn't have to set the expected
         //    background to default; why do we need it for the pop?
@@ -1887,8 +1874,8 @@ public:
 
         // Second pop:
         cOptions = 0;
-        _testGetSet->_fPrivateGetConsoleScreenBufferAttributesResult = true;
-        _testGetSet->_fPrivateSetAttributesResult = true;
+        _testGetSet->_fPrivateGetTextAttributesResult = true;
+        _testGetSet->_fPrivateSetTextAttributesResult = true;
         _testGetSet->_expectedAttribute.SetDefaultBackground();
         _testGetSet->_expectedAttribute.SetDefaultForeground();
         VERIFY_IS_TRUE(_pDispatch->PopGraphicsRendition());
@@ -1944,8 +1931,8 @@ public:
 
         // And then restore...
         cOptions = 0;
-        _testGetSet->_fPrivateGetConsoleScreenBufferAttributesResult = true;
-        _testGetSet->_fPrivateSetAttributesResult = true;
+        _testGetSet->_fPrivateGetTextAttributesResult = true;
+        _testGetSet->_fPrivateSetTextAttributesResult = true;
         // Q: Why don't we set FOREGROUND_INTENSITY here?
         // A: That flag is folded in on the fly when you call GetLegacyAttributes based on
         //    the _isBold member, but it isn't actually stored in the legacy WORD.

@@ -204,18 +204,6 @@ BOOL ConhostInternalGetSet::PrivateSetLegacyAttributes(const WORD wAttr,
 }
 
 // Routine Description:
-// - Similar to PrivateSetLegacyAttributes, but sets the full fidelity TextAttribute.
-// Arguments:
-// - attributes - new text attributes to apply as default within the console text buffer
-// Return Value:
-// - TRUE.
-BOOL ConhostInternalGetSet::PrivateSetAttributes(const TextAttribute& attributes)
-{
-    DoSrvPrivateSetAttributes(_io.GetActiveOutputBuffer(), attributes);
-    return TRUE;
-}
-
-// Routine Description:
 // - Sets the current attributes of the screen buffer to use the color table entry specified by
 //     the iXtermTableEntry. Sets either the FG or the BG component of the attributes.
 // Arguments:
@@ -637,18 +625,6 @@ BOOL ConhostInternalGetSet::SetCursorStyle(const CursorType cursorType)
 BOOL ConhostInternalGetSet::PrivateGetConsoleScreenBufferLegacyAttributes(_Out_ WORD* const pwAttributes)
 {
     return NT_SUCCESS(DoSrvPrivateGetConsoleScreenBufferLegacyAttributes(_io.GetActiveOutputBuffer(), pwAttributes));
-}
-
-// Routine Description:
-// - Retrieves the default text attributes information for the active screen buffer.
-// - Similar to PrivateGetConsoleScreenBufferLegacyAttributes, but gets the full attributes.
-// Arguments:
-// - pAttributes - Pointer to space to receive attributes data
-// Return Value:
-// - TRUE if successful. FALSE otherwise.
-BOOL ConhostInternalGetSet::PrivateGetConsoleScreenBufferAttributes(_Out_ TextAttribute* const pAttributes)
-{
-    return NT_SUCCESS(DoSrvPrivateGetConsoleScreenBufferAttributes(_io.GetActiveOutputBuffer(), pAttributes));
 }
 
 // Routine Description:
