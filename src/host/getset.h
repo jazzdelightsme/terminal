@@ -25,9 +25,6 @@ void DoSrvPrivateSetLegacyAttributes(SCREEN_INFORMATION& screenInfo,
                                      const bool fBackground,
                                      const bool fMeta);
 
-void DoSrvPrivateSetAttributes(SCREEN_INFORMATION& screenInfo,
-                               const TextAttribute& Attributes);
-
 void DoSrvPrivateSetDefaultAttributes(SCREEN_INFORMATION& screenInfo, const bool fForeground, const bool fBackground);
 
 [[nodiscard]] NTSTATUS DoSrvPrivateSetCursorKeysMode(_In_ bool fApplicationMode);
@@ -76,8 +73,6 @@ void DoSrvSetCursorColor(SCREEN_INFORMATION& screenInfo,
 
 [[nodiscard]] NTSTATUS DoSrvPrivateGetConsoleScreenBufferLegacyAttributes(const SCREEN_INFORMATION& screenInfo,
                                                                           _Out_ WORD* const pwAttributes);
-[[nodiscard]] NTSTATUS DoSrvPrivateGetConsoleScreenBufferAttributes(_In_ const SCREEN_INFORMATION& screenInfo,
-                                                                    _Out_ TextAttribute* const pAttributes);
 
 void DoSrvPrivateRefreshWindow(const SCREEN_INFORMATION& screenInfo);
 

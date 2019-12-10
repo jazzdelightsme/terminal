@@ -40,8 +40,6 @@ namespace Microsoft::Console::VirtualTerminal
                                                 const bool fBackground,
                                                 const bool fMeta) = 0;
 
-        virtual BOOL PrivateSetAttributes(const TextAttribute& attributes) = 0;
-
         virtual BOOL PrivateSetDefaultAttributes(const bool fForeground, const bool fBackground) = 0;
 
         virtual BOOL SetConsoleXtermTextAttribute(const int iXtermTableEntry,
@@ -84,7 +82,6 @@ namespace Microsoft::Console::VirtualTerminal
         virtual BOOL SetCursorStyle(const CursorType cursorType) = 0;
         virtual BOOL SetCursorColor(const COLORREF cursorColor) = 0;
         virtual BOOL PrivateGetConsoleScreenBufferLegacyAttributes(_Out_ WORD* const pwAttributes) = 0;
-        virtual BOOL PrivateGetConsoleScreenBufferAttributes(_Out_ TextAttribute* const pAttributes) = 0;
         virtual BOOL PrivatePrependConsoleInput(_Inout_ std::deque<std::unique_ptr<IInputEvent>>& events,
                                                 _Out_ size_t& eventsWritten) = 0;
         virtual BOOL PrivateWriteConsoleControlInput(_In_ KeyEvent key) = 0;

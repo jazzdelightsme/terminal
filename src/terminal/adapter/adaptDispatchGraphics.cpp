@@ -565,7 +565,7 @@ bool AdaptDispatch::PushGraphicsRendition(_In_reads_(cOptions) const DispatchTyp
     bool fSuccess = true;
     TextAttribute currentAttributes;
 
-    fSuccess = _conApi->PrivateGetConsoleScreenBufferAttributes(&currentAttributes);
+    fSuccess = _conApi->PrivateGetTextAttributes(&currentAttributes);
 
     if (fSuccess)
     {
@@ -587,11 +587,11 @@ bool AdaptDispatch::PopGraphicsRendition()
     bool fSuccess = true;
     TextAttribute currentAttributes;
 
-    fSuccess = _conApi->PrivateGetConsoleScreenBufferAttributes(&currentAttributes);
+    fSuccess = _conApi->PrivateGetTextAttributes(&currentAttributes);
 
     if (fSuccess)
     {
-        fSuccess = _conApi->PrivateSetAttributes(_sgrStack.Pop(currentAttributes));
+        fSuccess = _conApi->PrivateSetTextAttributes(_sgrStack.Pop(currentAttributes));
     }
 
     return fSuccess;
