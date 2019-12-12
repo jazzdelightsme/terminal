@@ -689,7 +689,7 @@ bool OutputStateMachineEngine::_IntermediateHashDispatch(const wchar_t wchAction
 {
     bool fSuccess = false;
 
-    DispatchTypes::GraphicsOptions rgPushPopParams[StateMachine::s_cParamsMax];
+    DispatchTypes::SgrSaveRestoreStackOptions rgPushPopParams[StateMachine::s_cParamsMax];
     size_t cOptions = StateMachine::s_cParamsMax;
     // Ensure that there was the right number of params
     switch (wchAction)

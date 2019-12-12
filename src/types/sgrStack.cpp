@@ -13,25 +13,32 @@ SgrStack::SgrStack() noexcept :
 }
 
 void SgrStack::Push(const TextAttribute& currentAttributes,
-                    const gsl::span<const DispatchTypes::GraphicsOptions> options) noexcept
+                    const gsl::span<const DispatchTypes::SgrSaveRestoreStackOptions> options) noexcept
 {
-    uint32_t validParts = 0;
+    AttrBitset validParts;
 
     if (options.size() == 0)
     {
         // We save all current attributes.
-        validParts = UINT32_MAX;
+        validParts.set(); // (sets all bits)
     }
     else
     {
         // Each option is encoded as a bit in validParts. Options that aren't
         // supported are ignored. So if you try to save only unsuppported aspects
-        // of the current text attributes, validParts will be zero, and you'll do
+        // of the current text attributes, validParts end up as zero, and you'll do
         // what is effectively an "empty" push (the subsequent pop will not change
         // the current attributes).
         for (auto option : options)
         {
-            validParts |= _GraphicsOptionToFlag(option);
+            size_t optionAsIndex = static_cast<size_t>(option);
+
+            // Options must be specified singly; not in combination. Values that are
+            // out of range will be ignored.
+            if (optionAsIndex < validParts.size())
+            {
+                validParts.set(optionAsIndex);
+            }
         }
     }
 
@@ -55,9 +62,9 @@ const TextAttribute SgrStack::Pop(const TextAttribute& currentAttributes) noexce
 
         if (_numSgrPushes < _storedSgrAttributes.size())
         {
-            const uint32_t validParts = _validAttributes[_numSgrPushes];
+            const AttrBitset validParts = _validAttributes[_numSgrPushes];
 
-            if (validParts == UINT32_MAX)
+            if (validParts.all())
             {
                 return _storedSgrAttributes[_numSgrPushes];
             }
@@ -73,22 +80,9 @@ const TextAttribute SgrStack::Pop(const TextAttribute& currentAttributes) noexce
     return currentAttributes;
 }
 
-constexpr uint32_t SgrStack::_GraphicsOptionToFlag(DispatchTypes::GraphicsOptions option)
-{
-    int iOption = static_cast<int>(option);
-
-    if (iOption < (sizeof(uint32_t) * 8))
-    {
-        iOption = 1 << iOption;
-    }
-    // else it's a bad parameter; we'll just ignore it
-
-    return iOption;
-}
-
 TextAttribute SgrStack::_CombineWithCurrentAttributes(const TextAttribute& currentAttributes,
                                                       const TextAttribute& savedAttribute,
-                                                      uint32_t validParts) noexcept // of savedAttribute
+                                                      const AttrBitset validParts) noexcept // of savedAttribute
 {
     TextAttribute result = currentAttributes;
 
@@ -116,7 +110,7 @@ TextAttribute SgrStack::_CombineWithCurrentAttributes(const TextAttribute& curre
     //
     // Attributes that are not currently supported are simply ignored.
 
-    if (_GraphicsOptionToFlag(DispatchTypes::GraphicsOptions::BoldBright) & validParts)
+    if (validParts.test(static_cast<size_t>(DispatchTypes::SgrSaveRestoreStackOptions::Boldness)))
     {
         if (savedAttribute.IsBold())
         {
@@ -128,7 +122,7 @@ TextAttribute SgrStack::_CombineWithCurrentAttributes(const TextAttribute& curre
         }
     }
 
-    if (_GraphicsOptionToFlag(DispatchTypes::GraphicsOptions::Underline) & validParts)
+    if (validParts.test(static_cast<size_t>(DispatchTypes::SgrSaveRestoreStackOptions::Underline)))
     {
         if (savedAttribute.IsUnderline())
         {
@@ -140,7 +134,7 @@ TextAttribute SgrStack::_CombineWithCurrentAttributes(const TextAttribute& curre
         }
     }
 
-    if (_GraphicsOptionToFlag(DispatchTypes::GraphicsOptions::Negative) & validParts)
+    if (validParts.test(static_cast<size_t>(DispatchTypes::SgrSaveRestoreStackOptions::Negative)))
     {
         if (savedAttribute.IsReverseVideo())
         {
@@ -158,12 +152,12 @@ TextAttribute SgrStack::_CombineWithCurrentAttributes(const TextAttribute& curre
         }
     }
 
-    if (_GraphicsOptionToFlag(DispatchTypes::GraphicsOptions::SaveForegroundColor) & validParts)
+    if (validParts.test(static_cast<size_t>(DispatchTypes::SgrSaveRestoreStackOptions::SaveForegroundColor)))
     {
         result.SetForegroundFrom(savedAttribute);
     }
 
-    if (_GraphicsOptionToFlag(DispatchTypes::GraphicsOptions::SaveBackgroundColor) & validParts)
+    if (validParts.test(static_cast<size_t>(DispatchTypes::SgrSaveRestoreStackOptions::SaveBackgroundColor)))
     {
         result.SetBackgroundFrom(savedAttribute);
     }

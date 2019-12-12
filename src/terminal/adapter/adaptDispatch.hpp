@@ -57,7 +57,7 @@ namespace Microsoft::Console::VirtualTerminal
         bool DeleteCharacter(_In_ unsigned int const uiCount) override; // DCH
         bool SetGraphicsRendition(_In_reads_(cOptions) const DispatchTypes::GraphicsOptions* const rgOptions,
                                   const size_t cOptions) override; // SGR
-        bool PushGraphicsRendition(_In_reads_(cOptions) const DispatchTypes::GraphicsOptions* const rgOptions,
+        bool PushGraphicsRendition(_In_reads_(cOptions) const DispatchTypes::SgrSaveRestoreStackOptions* const rgOptions,
                                    const size_t cOptions) override; // XTPUSHSGR
         bool PopGraphicsRendition() override; // XTPOPSGR
         bool DeviceStatusReport(const DispatchTypes::AnsiStatusType statusType) override; // DSR

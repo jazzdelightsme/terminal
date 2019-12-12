@@ -559,7 +559,7 @@ bool AdaptDispatch::SetGraphicsRendition(_In_reads_(cOptions) const DispatchType
 //   others are ignored. If no options are specified, all attributes are stored.
 // Return Value:
 // - True if handled successfully. False otherwise.
-bool AdaptDispatch::PushGraphicsRendition(_In_reads_(cOptions) const DispatchTypes::GraphicsOptions* const rgOptions,
+bool AdaptDispatch::PushGraphicsRendition(_In_reads_(cOptions) const DispatchTypes::SgrSaveRestoreStackOptions* const rgOptions,
                                           const size_t cOptions)
 {
     bool fSuccess = true;

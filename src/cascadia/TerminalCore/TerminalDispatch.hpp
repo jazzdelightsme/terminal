@@ -16,7 +16,7 @@ public:
     bool SetGraphicsRendition(const ::Microsoft::Console::VirtualTerminal::DispatchTypes::GraphicsOptions* const rgOptions,
                               const size_t cOptions) override;
 
-    bool PushGraphicsRendition(const ::Microsoft::Console::VirtualTerminal::DispatchTypes::GraphicsOptions* const rgOptions,
+    bool PushGraphicsRendition(const ::Microsoft::Console::VirtualTerminal::DispatchTypes::SgrSaveRestoreStackOptions* const rgOptions,
                                const size_t cOptions) override;
     bool PopGraphicsRendition() override;
 

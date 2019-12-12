@@ -1792,6 +1792,7 @@ public:
         _testGetSet->_fPrivateSetLegacyAttributesResult = TRUE;
 
         DispatchTypes::GraphicsOptions rgOptions[16];
+        DispatchTypes::SgrSaveRestoreStackOptions rgStackOptions[16];
         size_t cOptions = 1;
 
         Log::Comment(L"Test 1: Basic push and pop");
@@ -1807,7 +1808,7 @@ public:
         VERIFY_IS_TRUE(_pDispatch->SetGraphicsRendition(rgOptions, cOptions));
 
         cOptions = 0;
-        VERIFY_IS_TRUE(_pDispatch->PushGraphicsRendition(rgOptions, cOptions));
+        VERIFY_IS_TRUE(_pDispatch->PushGraphicsRendition(rgStackOptions, cOptions));
 
         _testGetSet->_fPrivateGetTextAttributesResult = true;
         _testGetSet->_fPrivateSetTextAttributesResult = true;
@@ -1817,7 +1818,7 @@ public:
 
         Log::Comment(L"Test 2: Push, change color, pop");
 
-        VERIFY_IS_TRUE(_pDispatch->PushGraphicsRendition(rgOptions, cOptions));
+        VERIFY_IS_TRUE(_pDispatch->PushGraphicsRendition(rgStackOptions, cOptions));
 
         cOptions = 1;
         rgOptions[0] = DispatchTypes::GraphicsOptions::ForegroundCyan;
@@ -1837,7 +1838,7 @@ public:
         Log::Comment(L"Test 3: two pushes (nested) and pops");
 
         // First push:
-        VERIFY_IS_TRUE(_pDispatch->PushGraphicsRendition(rgOptions, cOptions));
+        VERIFY_IS_TRUE(_pDispatch->PushGraphicsRendition(rgStackOptions, cOptions));
 
         cOptions = 1;
         rgOptions[0] = DispatchTypes::GraphicsOptions::ForegroundRed;
@@ -1849,7 +1850,7 @@ public:
 
         // Second push:
         cOptions = 0;
-        VERIFY_IS_TRUE(_pDispatch->PushGraphicsRendition(rgOptions, cOptions));
+        VERIFY_IS_TRUE(_pDispatch->PushGraphicsRendition(rgStackOptions, cOptions));
 
         cOptions = 1;
         rgOptions[0] = DispatchTypes::GraphicsOptions::ForegroundGreen;
@@ -1906,9 +1907,9 @@ public:
 
         // Push, specifying that we only want to save the background and the boldness:
         cOptions = 2;
-        rgOptions[0] = DispatchTypes::GraphicsOptions::BoldBright;
-        rgOptions[1] = DispatchTypes::GraphicsOptions::SaveBackgroundColor;
-        VERIFY_IS_TRUE(_pDispatch->PushGraphicsRendition(rgOptions, cOptions));
+        rgStackOptions[0] = DispatchTypes::SgrSaveRestoreStackOptions::Boldness;
+        rgStackOptions[1] = DispatchTypes::SgrSaveRestoreStackOptions::SaveBackgroundColor;
+        VERIFY_IS_TRUE(_pDispatch->PushGraphicsRendition(rgStackOptions, cOptions));
 
         // Now change everything...
         cOptions = 1;

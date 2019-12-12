@@ -27,10 +27,6 @@ namespace Microsoft::Console::VirtualTerminal::DispatchTypes
         Negative = 7,
         Invisible = 8,
         CrossedOut = 9,
-        // 10 - 19 are actually for selecting fonts, but rarely implemented. 10 and 11
-        // have been repurposed by xterm for XTPUSHGR.
-        SaveForegroundColor = 10,
-        SaveBackgroundColor = 11,
         DoublyUnderlined = 21,
         UnBold = 22,
         NotItalics = 23,
@@ -75,6 +71,40 @@ namespace Microsoft::Console::VirtualTerminal::DispatchTypes
         BrightBackgroundMagenta = 105,
         BrightBackgroundCyan = 106,
         BrightBackgroundWhite = 107,
+    };
+
+    // Many of these correspond directly to SGR parameters (the GraphicsOptions enum), but
+    // these are distinct (notably 10 and 11, which as SGR parameters would select fonts,
+    // are used here to indicate that the foreground/background colors should be saved).
+    // From xterm's ctlseqs doc for XTPUSHSGR:
+    //
+    //      Ps = 1    =>  Bold.
+    //      Ps = 2    =>  Faint.
+    //      Ps = 3    =>  Italicized.
+    //      Ps = 4    =>  Underlined.
+    //      Ps = 5    =>  Blink.
+    //      Ps = 7    =>  Inverse.
+    //      Ps = 8    =>  Invisible.
+    //      Ps = 9    =>  Crossed-out characters.
+    //      Ps = 1 0  =>  Foreground color.
+    //      Ps = 1 1  =>  Background color.
+    //      Ps = 2 1  =>  Doubly-underlined.
+    //
+    enum class SgrSaveRestoreStackOptions : unsigned int
+    {
+        Nothing = 0,
+        Boldness = 1,
+        Faintness = 2,
+        Italics = 3,
+        Underline = 4,
+        Blink = 5,
+        Negative = 7,
+        Invisible = 8,
+        CrossedOut = 9,
+        SaveForegroundColor = 10,
+        SaveBackgroundColor = 11,
+        DoublyUnderlined = 21,
+        Max = DoublyUnderlined
     };
 
     enum class AnsiStatusType : unsigned int

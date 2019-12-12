@@ -485,7 +485,7 @@ bool Terminal::SetDefaultBackground(const COLORREF dwColor)
 //   others are ignored. If no options are specified, all attributes are stored.
 // Return Value:
 // - true
-bool Terminal::PushGraphicsRendition(const ::Microsoft::Console::VirtualTerminal::DispatchTypes::GraphicsOptions* options, size_t cOptions)
+bool Terminal::PushGraphicsRendition(const ::Microsoft::Console::VirtualTerminal::DispatchTypes::SgrSaveRestoreStackOptions* options, size_t cOptions)
 {
     _sgrStack.Push(_buffer->GetCurrentAttributes(), { options, (int)cOptions });
     return true;
