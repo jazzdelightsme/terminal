@@ -15,6 +15,7 @@ Abstract:
 
 #include "..\..\buffer\out\TextAttribute.hpp"
 #include "..\..\terminal\adapter\DispatchTypes.hpp"
+#include <bitset>
 
 namespace Microsoft::Console::VirtualTerminal
 {
@@ -32,7 +33,7 @@ namespace Microsoft::Console::VirtualTerminal
         // Return Value:
         // - <none>
         void Push(const TextAttribute& currentAttributes,
-                  const gsl::span<const DispatchTypes::GraphicsOptions> options) noexcept;
+                  const gsl::span<const DispatchTypes::SgrSaveRestoreStackOptions> options) noexcept;
 
         // Method Description:
         // - Restores text attributes by removing from the top of the internal stack,
@@ -58,16 +59,14 @@ namespace Microsoft::Console::VirtualTerminal
         static constexpr int c_MaxBalancedPushes = 100;
 
     private:
-        static constexpr uint32_t _GraphicsOptionToFlag(DispatchTypes::GraphicsOptions option);
+        typedef std::bitset<static_cast<size_t>(DispatchTypes::SgrSaveRestoreStackOptions::Max) + 1> AttrBitset;
 
         TextAttribute _CombineWithCurrentAttributes(const TextAttribute& currentAttributes,
                                                     const TextAttribute& savedAttribute,
-                                                    uint32_t validParts) noexcept; // of savedAttribute
+                                                    const AttrBitset validParts) noexcept; // valid parts of savedAttribute
 
         int _numSgrPushes; // used as an index into the following arrays
         std::array<TextAttribute, c_MaxStoredSgrPushes> _storedSgrAttributes;
-        std::array<uint32_t, c_MaxStoredSgrPushes> _validAttributes;
-        //TextAttribute _storedSgrAttributes[c_MaxStoredSgrPushes];
-        //uint32_t _validAttributes[c_MaxStoredSgrPushes]; // flags that indicate which portions of the attributes are valid
+        std::array<AttrBitset, c_MaxStoredSgrPushes> _validAttributes; // flags that indicate which portions of the attributes are valid
     };
 }

@@ -77,7 +77,7 @@ public:
     virtual bool SetGraphicsRendition(_In_reads_(cOptions) const DispatchTypes::GraphicsOptions* const rgOptions,
                                       const size_t cOptions) = 0; // SGR
 
-    virtual bool PushGraphicsRendition(_In_reads_(cOptions) const DispatchTypes::GraphicsOptions* const rgOptions,
+    virtual bool PushGraphicsRendition(_In_reads_(cOptions) const DispatchTypes::SgrSaveRestoreStackOptions* const rgOptions,
                                        const size_t cOptions) = 0; // XTPUSHSGR
     virtual bool PopGraphicsRendition() = 0; // XTPOPSGR
 

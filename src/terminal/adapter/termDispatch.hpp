@@ -74,7 +74,7 @@ public:
     bool SetGraphicsRendition(_In_reads_(_Param_(2)) const DispatchTypes::GraphicsOptions* const /*rgOptions*/,
                               const size_t /*cOptions*/) override { return false; } // SGR
 
-    bool PushGraphicsRendition(_In_reads_(_Param_(2)) const DispatchTypes::GraphicsOptions* const /*rgOptions*/,
+    bool PushGraphicsRendition(_In_reads_(_Param_(2)) const DispatchTypes::SgrSaveRestoreStackOptions* const /*rgOptions*/,
                                const size_t /*cOptions*/) override { return false; } // XTPUSHSGR
     bool PopGraphicsRendition() override { return false; } // XTPOPSGR
 

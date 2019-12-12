@@ -83,7 +83,7 @@ public:
     bool SetCursorStyle(const ::Microsoft::Console::VirtualTerminal::DispatchTypes::CursorStyle cursorStyle) override;
     bool SetDefaultForeground(const COLORREF dwColor) override;
     bool SetDefaultBackground(const COLORREF dwColor) override;
-    bool PushGraphicsRendition(const ::Microsoft::Console::VirtualTerminal::DispatchTypes::GraphicsOptions* options, size_t cOptions) override;
+    bool PushGraphicsRendition(const ::Microsoft::Console::VirtualTerminal::DispatchTypes::SgrSaveRestoreStackOptions* options, size_t cOptions) override;
     bool PopGraphicsRendition() override;
 #pragma endregion
 

@@ -44,7 +44,7 @@ namespace Microsoft::Terminal::Core
         virtual bool SetDefaultForeground(const DWORD dwColor) = 0;
         virtual bool SetDefaultBackground(const DWORD dwColor) = 0;
 
-        virtual bool PushGraphicsRendition(const ::Microsoft::Console::VirtualTerminal::DispatchTypes::GraphicsOptions* options, size_t cOptions) = 0;
+        virtual bool PushGraphicsRendition(const ::Microsoft::Console::VirtualTerminal::DispatchTypes::SgrSaveRestoreStackOptions* options, size_t cOptions) = 0;
         virtual bool PopGraphicsRendition() = 0;
 
     protected:
