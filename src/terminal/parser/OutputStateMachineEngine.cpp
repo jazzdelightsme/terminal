@@ -687,13 +687,9 @@ bool OutputStateMachineEngine::_IntermediateHashDispatch(const wchar_t wchAction
 
     case VTActionCodes::XT_PopSgr:
     case VTActionCodes::XT_PopSgrAlias:
-        if (cParams > 0)
+        if (cParams == 0)
         {
             // Can't supply params for XTPOPSGR.
-            fSuccess = false;
-        }
-        else
-        {
             fSuccess = true;
         }
         break;
@@ -710,13 +706,13 @@ bool OutputStateMachineEngine::_IntermediateHashDispatch(const wchar_t wchAction
         case VTActionCodes::XT_PushSgr:
         case VTActionCodes::XT_PushSgrAlias:
             fSuccess = _dispatch->PushGraphicsRendition(rgPushPopParams, cOptions);
-            // TODO: telemetry
+            TermTelemetry::Instance().Log(TermTelemetry::Codes::XTPUSHSGR);
             break;
 
         case VTActionCodes::XT_PopSgr:
         case VTActionCodes::XT_PopSgrAlias:
             fSuccess = _dispatch->PopGraphicsRendition();
-            // TODO: telemetry
+            TermTelemetry::Instance().Log(TermTelemetry::Codes::XTPOPSGR);
             break;
 
         default:
@@ -1199,7 +1195,7 @@ _Success_(return ) bool OutputStateMachineEngine::_GetDeviceStatusOperation(_In_
 // - pcParams - Pointer to the length of rgTypedParams on the way in, and the count of the array used on the way out.
 // Return Value:
 // - True if we successfully retrieved an array of strongly-typed params from the parameters we've stored. False otherwise.
-template<typename TParamType>
+template<typename TParamType, bool bIgnoreNarrowingConversionFailures>
 _Success_(return ) bool OutputStateMachineEngine::_GetTypedParams(_In_reads_(cParams) const unsigned short* const rgusParams,
                                                                   const unsigned short cParams,
                                                                   _Out_writes_(*pcParams) TParamType* const rgTypedParams,
@@ -1210,12 +1206,36 @@ _Success_(return ) bool OutputStateMachineEngine::_GetTypedParams(_In_reads_(cPa
     {
         if (*pcParams >= cParams)
         {
-            for (size_t i = 0; i < cParams; i++)
+            int iDest = 0;
+            for (size_t iSrc = 0; iSrc < cParams; iSrc++)
             {
-                // No memcpy because the parameters are shorts, and the destination type may be a different size.
-                rgTypedParams[i] = static_cast<TParamType>(rgusParams[i]);
+                // No memcpy because the parameters are shorts, and the destination type
+                // may be a different size.
+                //
+                // Note that we use gsl::narrow_cast, not gsl::narrow, because we don't
+                // want someone to be able to shove a too-big number in and cause a crash.
+                // Instead, we will detect truncation after the fact, and ignore the
+                // parameter if that happened. And by "ignore the parameter", we mean it
+                // won't even be put into rgTypedParams (as opposed to, say, entering a 0,
+                // which may have some meaning). The caller can check this, if desired, by
+                // checking if the number of parameters they passed in equals the number
+                // of parameters they got out (cParams vs *pcParams).
+                rgTypedParams[iDest] = gsl::narrow_cast<TParamType>(rgusParams[iSrc]);
+                if (gsl::narrow_cast<unsigned short>(rgTypedParams[iDest]) == rgusParams[iSrc])
+                {
+                    iDest++;
+                }
+                else if (bIgnoreNarrowingConversionFailures)
+                {
+                    // we ignore the parameter
+                }
+                else
+                {
+                    fSuccess = false;
+                    break;
+                }
             }
-            *pcParams = cParams;
+            *pcParams = iDest;
             fSuccess = true;
         }
         else

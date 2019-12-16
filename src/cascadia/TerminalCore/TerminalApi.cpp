@@ -487,7 +487,7 @@ bool Terminal::SetDefaultBackground(const COLORREF dwColor)
 // - true
 bool Terminal::PushGraphicsRendition(const ::Microsoft::Console::VirtualTerminal::DispatchTypes::SgrSaveRestoreStackOptions* options, size_t cOptions)
 {
-    _sgrStack.Push(_buffer->GetCurrentAttributes(), { options, (int)cOptions });
+    _sgrStack.Push(_buffer->GetCurrentAttributes(), { options, static_cast<int>(cOptions) });
     return true;
 }
 

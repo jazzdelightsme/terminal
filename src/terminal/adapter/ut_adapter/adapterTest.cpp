@@ -269,7 +269,14 @@ public:
         if (_fPrivateBoldTextResult)
         {
             VERIFY_ARE_EQUAL(_fExpectedIsBold, isBold);
-            isBold ? _attribute.Embolden() : _attribute.Debolden();
+            if (isBold)
+            {
+                _attribute.Embolden();
+            }
+            else
+            {
+                _attribute.Debolden();
+            }
             _fExpectedIsBold = false;
         }
         return !!_fPrivateBoldTextResult;
@@ -745,7 +752,7 @@ public:
         _fExpectedCursorVisible = _fCursorVisible;
 
         // Attribute default is gray on black.
-        _attribute = TextAttribute();
+        _attribute = {};
         _attribute.SetFromLegacy(FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED);
         _expectedAttribute = _attribute;
 
@@ -1415,6 +1422,8 @@ public:
         // Then move cursor to the middle and reset the expected to the top left.
         _testGetSet->PrepData(CursorX::XCENTER, CursorY::YCENTER);
         _testGetSet->_coordExpectedCursorPos = coordExpected;
+        _testGetSet->_fPrivateSetTextAttributesResult = true;
+        _testGetSet->_expectedAttribute = {};
 
         VERIFY_IS_TRUE(_pDispatch->CursorRestoreState(), L"By default, restore to top left corner (0,0 offset from viewport).");
 

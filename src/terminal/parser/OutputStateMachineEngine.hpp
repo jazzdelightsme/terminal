@@ -202,7 +202,7 @@ namespace Microsoft::Console::VirtualTerminal
         _Success_(return ) bool _VerifyDeviceAttributesParams(_In_reads_(cParams) const unsigned short* const rgusParams,
                                                               const unsigned short cParams) const;
 
-        template<typename TParamType>
+        template<typename TParamType, bool bIgnoreNarrowingConversionFailures = true>
         _Success_(return ) bool _GetTypedParams(_In_reads_(cParams) const unsigned short* const rgusParams,
                                                 const unsigned short cParams,
                                                 _Out_writes_(*pcParams) TParamType* const rgXtPushParams,
