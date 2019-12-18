@@ -1924,7 +1924,7 @@ public:
         // Now change everything...
         cOptions = 2;
         rgOptions[0] = DispatchTypes::GraphicsOptions::BackgroundGreen;
-        rgOptions[2] = DispatchTypes::GraphicsOptions::DoublyUnderlined;
+        rgOptions[1] = DispatchTypes::GraphicsOptions::DoublyUnderlined;
         _testGetSet->_expectedAttribute.SetFromLegacy(FOREGROUND_GREEN | FOREGROUND_INTENSITY | BACKGROUND_GREEN);
         _testGetSet->_expectedAttribute.SetDoublyUnderlined(true);
         _testGetSet->_fExpectedForeground = false;
