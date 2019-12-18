@@ -47,16 +47,8 @@ namespace Microsoft::Console::VirtualTerminal
         //   combined with currentAttributes.
         const TextAttribute Pop(const TextAttribute& currentAttributes) noexcept;
 
-        // Xterm allows the save stack to go ten deep, so we'll follow suit. Pushes after
-        // ten deep will still remain "balanced"--once you pop back down below ten, you'll
-        // restore the appropriate text attributes. However, if you get more than a
-        // hundred pushes deep, we'll stop counting. Why unbalance somebody doing so many
-        // pushes? Putting a bound on it allows us to provide "reset" functionality: at
-        // any given point, you can execute 101 pops and know that you've taken the stack
-        // (push count) to zero. (Then you reset text attributes, and your state is
-        // clean.)
+        // Xterm allows the save stack to go ten deep, so we'll follow suit.
         static constexpr int c_MaxStoredSgrPushes = 10;
-        static constexpr int c_MaxBalancedPushes = 100;
 
     private:
         // Note the +1 in the size of the bitset: this is because we use the
@@ -69,8 +61,55 @@ namespace Microsoft::Console::VirtualTerminal
                                                     const TextAttribute& savedAttribute,
                                                     const AttrBitset validParts) noexcept; // valid parts of savedAttribute
 
-        int _numSgrPushes; // used as an index into the following arrays
-        std::array<TextAttribute, c_MaxStoredSgrPushes> _storedSgrAttributes;
-        std::array<AttrBitset, c_MaxStoredSgrPushes> _validAttributes; // flags that indicate which portions of the attributes are valid
+        struct SavedSgrAttributes
+        {
+            TextAttribute TextAttributes;
+            AttrBitset ValidParts; // flags that indicate which parts of TextAttributes are meaningful
+        };
+
+        // The number of "save slots" on the stack is limited (let's say there are N). So
+        // there are a couple of problems to think about: what to do about apps that try
+        // to do more pushes than will fit, and how to recover from garbage (such as
+        // accidentally cat'ing a binary file that looks like lots of pushes).
+        //
+        // Dealing with more pops than pushes is simple: just ignore pops when the stack
+        // is empty.
+        //
+        // But how should we handle doing more pushes than are supported by the storage?
+        //
+        // One approach might be to ignore pushes once the stack is full. Things won't
+        // look right while the number of outstanding pushes is above the stack, but once
+        // it gets popped back down into range, things start working again. Put another
+        // way: with a traditional stack, the first N pushes work, and the last N pops
+        // work. But that introduces a burden: you have to do something (lots of pops) in
+        // order to recover from garbage. (There are strategies that could be employed to
+        // place an upper bound on how many pops are required (say K), but it's still
+        // something that /must/ be done to recover from a blown stack.)
+        //
+        // An alternative approach is a "ring stack": if you do another push when the
+        // stack is already full, it just drops the bottom of the stack. With this
+        // strategy, the last N pushes work, and the first N pops work. And the advantage
+        // of this approach is that there is no "recovery procedure" necessary: if you
+        // want a clean slate, you can just declare a clean slate--you will always have N
+        // slots for pushes and pops in front of you.
+        //
+        // A ring stack will also lead to apps that are friendlier to cross-app
+        // pushes/pops.
+        //
+        // Consider using a traditional stack. In that case, an app might be tempted to
+        // always begin by issuing a bunch of pops (K), in order to ensure they have a
+        // clean state. However, apps that behave that way would not work well with
+        // cross-app push/pops (e.g. I push before I ssh to my remote system, and will pop
+        // when after closing the connection, and during the connection I'll run apps on
+        // the remote host which might also do pushes and pops). By using a ring stack, an
+        // app does not need to do /anything/ to start in a "clean state"--an app can
+        // ALWAYS consider its initial state to be clean.
+        //
+        // So we've chosen to use a "ring stack", because it is simplest for apps to deal
+        // with.
+
+        int _nextPushIndex; // will wrap around once the stack is full
+        int _numSavedAttrs; // how much of _storedSgrAttributes is actually in use
+        std::array<SavedSgrAttributes, c_MaxStoredSgrPushes> _storedSgrAttributes;
     };
 }
