@@ -8,7 +8,8 @@ namespace Microsoft::Console::VirtualTerminal
 {
 
 SgrStack::SgrStack() noexcept :
-    _numSgrPushes{ 0 }
+    _nextPushIndex{ 0 },
+    _numSavedAttrs{ 0 }
 {
 }
 
@@ -28,7 +29,7 @@ void SgrStack::Push(const TextAttribute& currentAttributes,
         // supported are ignored. So if you try to save only unsuppported aspects
         // of the current text attributes, validParts end up as zero, and you'll do
         // what is effectively an "empty" push (the subsequent pop will not change
-        // the current attributes).
+        // the current attributes), which is the correct behavior.
         for (auto option : options)
         {
             size_t optionAsIndex = static_cast<size_t>(option);
@@ -42,38 +43,41 @@ void SgrStack::Push(const TextAttribute& currentAttributes,
         }
     }
 
-    if (_numSgrPushes < _storedSgrAttributes.size())
+    if (_numSavedAttrs < _storedSgrAttributes.size())
     {
-        _storedSgrAttributes[_numSgrPushes] = currentAttributes;
-        _validAttributes[_numSgrPushes] = validParts;
+        _numSavedAttrs++;
     }
 
-    if (_numSgrPushes < c_MaxBalancedPushes)
-    {
-        _numSgrPushes++;
-    }
+    _storedSgrAttributes[_nextPushIndex] = { currentAttributes, validParts };
+    _nextPushIndex = (_nextPushIndex + 1) % _storedSgrAttributes.size();
 }
 
 const TextAttribute SgrStack::Pop(const TextAttribute& currentAttributes) noexcept
 {
-    if (_numSgrPushes > 0)
+    if (_numSavedAttrs > 0)
     {
-        _numSgrPushes--;
+        _numSavedAttrs--;
 
-        if (_numSgrPushes < _storedSgrAttributes.size())
+        if (_nextPushIndex == 0)
         {
-            const AttrBitset validParts = _validAttributes[_numSgrPushes];
+            _nextPushIndex = gsl::narrow<int>(_storedSgrAttributes.size() - 1);
+        }
+        else
+        {
+            _nextPushIndex--;
+        }
 
-            if (validParts.all())
-            {
-                return _storedSgrAttributes[_numSgrPushes];
-            }
-            else
-            {
-                return _CombineWithCurrentAttributes(currentAttributes,
-                                                     _storedSgrAttributes[_numSgrPushes],
-                                                     validParts);
-            }
+        SavedSgrAttributes& restoreMe = _storedSgrAttributes[_nextPushIndex];
+
+        if (restoreMe.ValidParts.all())
+        {
+            return restoreMe.TextAttributes;
+        }
+        else
+        {
+            return _CombineWithCurrentAttributes(currentAttributes,
+                                                 restoreMe.TextAttributes,
+                                                 restoreMe.ValidParts);
         }
     }
 
