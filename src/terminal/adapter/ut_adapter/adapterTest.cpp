@@ -1914,21 +1914,25 @@ public:
         _testGetSet->_fExpectedMeta = false;
         VERIFY_IS_TRUE(_pDispatch->SetGraphicsRendition(rgOptions, cOptions));
 
-        // Push, specifying that we only want to save the background and the boldness:
-        cOptions = 2;
+        // Push, specifying that we only want to save the background, the boldness, and double-underline-ness:
+        cOptions = 3;
         rgStackOptions[0] = DispatchTypes::SgrSaveRestoreStackOptions::Boldness;
         rgStackOptions[1] = DispatchTypes::SgrSaveRestoreStackOptions::SaveBackgroundColor;
+        rgStackOptions[2] = DispatchTypes::SgrSaveRestoreStackOptions::DoublyUnderlined;
         VERIFY_IS_TRUE(_pDispatch->PushGraphicsRendition(rgStackOptions, cOptions));
 
         // Now change everything...
-        cOptions = 1;
+        cOptions = 2;
         rgOptions[0] = DispatchTypes::GraphicsOptions::BackgroundGreen;
+        rgOptions[2] = DispatchTypes::GraphicsOptions::DoublyUnderlined;
         _testGetSet->_expectedAttribute.SetFromLegacy(FOREGROUND_GREEN | FOREGROUND_INTENSITY | BACKGROUND_GREEN);
+        _testGetSet->_expectedAttribute.SetDoublyUnderlined(true);
         _testGetSet->_fExpectedForeground = false;
         _testGetSet->_fExpectedBackground = true;
         _testGetSet->_fExpectedMeta = false;
         VERIFY_IS_TRUE(_pDispatch->SetGraphicsRendition(rgOptions, cOptions));
 
+        cOptions = 1;
         rgOptions[0] = DispatchTypes::GraphicsOptions::ForegroundRed;
         _testGetSet->_expectedAttribute.SetFromLegacy(FOREGROUND_RED | BACKGROUND_GREEN);
         _testGetSet->_fExpectedForeground = true;
@@ -1948,6 +1952,7 @@ public:
         //    the _isBold member, but it isn't actually stored in the legacy WORD.
         _testGetSet->_expectedAttribute.SetFromLegacy(FOREGROUND_RED | BACKGROUND_BLUE);
         _testGetSet->_expectedAttribute.Embolden();
+        _testGetSet->_expectedAttribute.SetDoublyUnderlined(false);
         VERIFY_IS_TRUE(_pDispatch->PopGraphicsRendition());
     }
 

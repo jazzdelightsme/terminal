@@ -108,8 +108,10 @@ TextAttribute SgrStack::_CombineWithCurrentAttributes(const TextAttribute& curre
     //
     //  (some closing braces for people with editors that get thrown off without them: }})
     //
-    // Attributes that are not currently supported are simply ignored.
+    // Note that not all of these attributes are actually supported by renderers/conhost,
+    // despite setters/getters on TextAttribute.
 
+    // Boldness = 1,
     if (validParts.test(static_cast<size_t>(DispatchTypes::SgrSaveRestoreStackOptions::Boldness)))
     {
         if (savedAttribute.IsBold())
@@ -122,6 +124,19 @@ TextAttribute SgrStack::_CombineWithCurrentAttributes(const TextAttribute& curre
         }
     }
 
+    // Faintness = 2,
+    if (validParts.test(static_cast<size_t>(DispatchTypes::SgrSaveRestoreStackOptions::Faintness)))
+    {
+        result.SetFaint(savedAttribute.IsFaint());
+    }
+
+    // Italics = 3,
+    if (validParts.test(static_cast<size_t>(DispatchTypes::SgrSaveRestoreStackOptions::Italics)))
+    {
+        result.SetItalics(savedAttribute.IsItalicized());
+    }
+
+    // Underline = 4,
     if (validParts.test(static_cast<size_t>(DispatchTypes::SgrSaveRestoreStackOptions::Underline)))
     {
         if (savedAttribute.IsUnderline())
@@ -134,6 +149,13 @@ TextAttribute SgrStack::_CombineWithCurrentAttributes(const TextAttribute& curre
         }
     }
 
+    // Blink = 5,
+    if (validParts.test(static_cast<size_t>(DispatchTypes::SgrSaveRestoreStackOptions::Blink)))
+    {
+        result.SetBlinking(savedAttribute.IsBlinking());
+    }
+
+    // Negative = 7,
     if (validParts.test(static_cast<size_t>(DispatchTypes::SgrSaveRestoreStackOptions::Negative)))
     {
         if (savedAttribute.IsReverseVideo())
@@ -152,14 +174,34 @@ TextAttribute SgrStack::_CombineWithCurrentAttributes(const TextAttribute& curre
         }
     }
 
+    // Invisible = 8,
+    if (validParts.test(static_cast<size_t>(DispatchTypes::SgrSaveRestoreStackOptions::Invisible)))
+    {
+        result.SetInvisible(savedAttribute.IsInvisible());
+    }
+
+    // CrossedOut = 9,
+    if (validParts.test(static_cast<size_t>(DispatchTypes::SgrSaveRestoreStackOptions::CrossedOut)))
+    {
+        result.SetCrossedOut(savedAttribute.IsCrossedOut());
+    }
+
+    // SaveForegroundColor = 10,
     if (validParts.test(static_cast<size_t>(DispatchTypes::SgrSaveRestoreStackOptions::SaveForegroundColor)))
     {
         result.SetForegroundFrom(savedAttribute);
     }
 
+    // SaveBackgroundColor = 11,
     if (validParts.test(static_cast<size_t>(DispatchTypes::SgrSaveRestoreStackOptions::SaveBackgroundColor)))
     {
         result.SetBackgroundFrom(savedAttribute);
+    }
+
+    // DoublyUnderlined = 21,
+    if (validParts.test(static_cast<size_t>(DispatchTypes::SgrSaveRestoreStackOptions::DoublyUnderlined)))
+    {
+        result.SetDoublyUnderlined(savedAttribute.IsDoublyUnderlined());
     }
 
     return result;
