@@ -31,24 +31,33 @@ namespace Microsoft::Console::VirtualTerminal
             // current attributes), which is the correct behavior.
             for (auto option : options)
             {
-                size_t optionAsIndex = static_cast<size_t>(option);
+                const size_t optionAsIndex = static_cast<size_t>(option);
 
                 // Options must be specified singly; not in combination. Values that are
                 // out of range will be ignored.
                 if (optionAsIndex < validParts.size())
                 {
-                    validParts.set(optionAsIndex);
+                    try
+                    {
+                        validParts.set(optionAsIndex);
+                    }
+                    catch (std::out_of_range&)
+                    {
+                        // We should not be able to reach here: we already checked
+                        // optionAsIndex against the size of the bitset.
+                        RaiseFailFastException(nullptr, nullptr, 0);
+                    }
                 }
             }
         }
 
-        if (_numSavedAttrs < _storedSgrAttributes.size())
+        if (_numSavedAttrs < gsl::narrow<int>(_storedSgrAttributes.size()))
         {
             _numSavedAttrs++;
         }
 
-        _storedSgrAttributes[_nextPushIndex] = { currentAttributes, validParts };
-        _nextPushIndex = (_nextPushIndex + 1) % _storedSgrAttributes.size();
+        _storedSgrAttributes.at(_nextPushIndex) = { currentAttributes, validParts };
+        _nextPushIndex = (_nextPushIndex + 1) % gsl::narrow<int>(_storedSgrAttributes.size());
     }
 
     const TextAttribute SgrStack::Pop(const TextAttribute& currentAttributes) noexcept
@@ -66,7 +75,7 @@ namespace Microsoft::Console::VirtualTerminal
                 _nextPushIndex--;
             }
 
-            SavedSgrAttributes& restoreMe = _storedSgrAttributes[_nextPushIndex];
+            SavedSgrAttributes& restoreMe = _storedSgrAttributes.at(_nextPushIndex);
 
             if (restoreMe.ValidParts.all())
             {
@@ -114,97 +123,106 @@ namespace Microsoft::Console::VirtualTerminal
         // Note that not all of these attributes are actually supported by
         // renderers/conhost, despite setters/getters on TextAttribute.
 
-        // Boldness = 1,
-        if (validParts.test(static_cast<size_t>(DispatchTypes::SgrSaveRestoreStackOptions::Boldness)))
+        try
         {
-            if (savedAttribute.IsBold())
+            // Boldness = 1,
+            if (validParts.test(static_cast<size_t>(DispatchTypes::SgrSaveRestoreStackOptions::Boldness)))
             {
-                result.Embolden();
-            }
-            else
-            {
-                result.Debolden();
-            }
-        }
-
-        // Faintness = 2,
-        if (validParts.test(static_cast<size_t>(DispatchTypes::SgrSaveRestoreStackOptions::Faintness)))
-        {
-            result.SetFaint(savedAttribute.IsFaint());
-        }
-
-        // Italics = 3,
-        if (validParts.test(static_cast<size_t>(DispatchTypes::SgrSaveRestoreStackOptions::Italics)))
-        {
-            result.SetItalics(savedAttribute.IsItalicized());
-        }
-
-        // Underline = 4,
-        if (validParts.test(static_cast<size_t>(DispatchTypes::SgrSaveRestoreStackOptions::Underline)))
-        {
-            if (savedAttribute.IsUnderline())
-            {
-                result.EnableUnderline();
-            }
-            else
-            {
-                result.DisableUnderline();
-            }
-        }
-
-        // Blink = 5,
-        if (validParts.test(static_cast<size_t>(DispatchTypes::SgrSaveRestoreStackOptions::Blink)))
-        {
-            result.SetBlinking(savedAttribute.IsBlinking());
-        }
-
-        // Negative = 7,
-        if (validParts.test(static_cast<size_t>(DispatchTypes::SgrSaveRestoreStackOptions::Negative)))
-        {
-            if (savedAttribute.IsReverseVideo())
-            {
-                if (!result.IsReverseVideo())
+                if (savedAttribute.IsBold())
                 {
-                    result.Invert();
+                    result.Embolden();
+                }
+                else
+                {
+                    result.Debolden();
                 }
             }
-            else
+
+            // Faintness = 2,
+            if (validParts.test(static_cast<size_t>(DispatchTypes::SgrSaveRestoreStackOptions::Faintness)))
             {
-                if (result.IsReverseVideo())
+                result.SetFaint(savedAttribute.IsFaint());
+            }
+
+            // Italics = 3,
+            if (validParts.test(static_cast<size_t>(DispatchTypes::SgrSaveRestoreStackOptions::Italics)))
+            {
+                result.SetItalics(savedAttribute.IsItalicized());
+            }
+
+            // Underline = 4,
+            if (validParts.test(static_cast<size_t>(DispatchTypes::SgrSaveRestoreStackOptions::Underline)))
+            {
+                if (savedAttribute.IsUnderline())
                 {
-                    result.Invert();
+                    result.EnableUnderline();
+                }
+                else
+                {
+                    result.DisableUnderline();
                 }
             }
-        }
 
-        // Invisible = 8,
-        if (validParts.test(static_cast<size_t>(DispatchTypes::SgrSaveRestoreStackOptions::Invisible)))
-        {
-            result.SetInvisible(savedAttribute.IsInvisible());
-        }
+            // Blink = 5,
+            if (validParts.test(static_cast<size_t>(DispatchTypes::SgrSaveRestoreStackOptions::Blink)))
+            {
+                result.SetBlinking(savedAttribute.IsBlinking());
+            }
 
-        // CrossedOut = 9,
-        if (validParts.test(static_cast<size_t>(DispatchTypes::SgrSaveRestoreStackOptions::CrossedOut)))
-        {
-            result.SetCrossedOut(savedAttribute.IsCrossedOut());
-        }
+            // Negative = 7,
+            if (validParts.test(static_cast<size_t>(DispatchTypes::SgrSaveRestoreStackOptions::Negative)))
+            {
+                if (savedAttribute.IsReverseVideo())
+                {
+                    if (!result.IsReverseVideo())
+                    {
+                        result.Invert();
+                    }
+                }
+                else
+                {
+                    if (result.IsReverseVideo())
+                    {
+                        result.Invert();
+                    }
+                }
+            }
 
-        // SaveForegroundColor = 10,
-        if (validParts.test(static_cast<size_t>(DispatchTypes::SgrSaveRestoreStackOptions::SaveForegroundColor)))
-        {
-            result.SetForegroundFrom(savedAttribute);
-        }
+            // Invisible = 8,
+            if (validParts.test(static_cast<size_t>(DispatchTypes::SgrSaveRestoreStackOptions::Invisible)))
+            {
+                result.SetInvisible(savedAttribute.IsInvisible());
+            }
 
-        // SaveBackgroundColor = 11,
-        if (validParts.test(static_cast<size_t>(DispatchTypes::SgrSaveRestoreStackOptions::SaveBackgroundColor)))
-        {
-            result.SetBackgroundFrom(savedAttribute);
-        }
+            // CrossedOut = 9,
+            if (validParts.test(static_cast<size_t>(DispatchTypes::SgrSaveRestoreStackOptions::CrossedOut)))
+            {
+                result.SetCrossedOut(savedAttribute.IsCrossedOut());
+            }
 
-        // DoublyUnderlined = 21,
-        if (validParts.test(static_cast<size_t>(DispatchTypes::SgrSaveRestoreStackOptions::DoublyUnderlined)))
+            // SaveForegroundColor = 10,
+            if (validParts.test(static_cast<size_t>(DispatchTypes::SgrSaveRestoreStackOptions::SaveForegroundColor)))
+            {
+                result.SetForegroundFrom(savedAttribute);
+            }
+
+            // SaveBackgroundColor = 11,
+            if (validParts.test(static_cast<size_t>(DispatchTypes::SgrSaveRestoreStackOptions::SaveBackgroundColor)))
+            {
+                result.SetBackgroundFrom(savedAttribute);
+            }
+
+            // DoublyUnderlined = 21,
+            if (validParts.test(static_cast<size_t>(DispatchTypes::SgrSaveRestoreStackOptions::DoublyUnderlined)))
+            {
+                result.SetDoublyUnderlined(savedAttribute.IsDoublyUnderlined());
+            }
+        }
+        catch (std::out_of_range&)
         {
-            result.SetDoublyUnderlined(savedAttribute.IsDoublyUnderlined());
+            // We should not be able to reach here: all values passed to bitset::test are
+            // constants, clearly in range of the bitset.
+            RaiseFailFastException(nullptr, nullptr, 0);
         }
 
         return result;
