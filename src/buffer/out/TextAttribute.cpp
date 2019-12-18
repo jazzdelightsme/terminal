@@ -261,6 +261,36 @@ void TextAttribute::SetExtendedAttributes(const ExtendedAttributes attrs) noexce
     _extendedAttrs = attrs;
 }
 
+void TextAttribute::SetItalics(bool value) noexcept
+{
+    WI_UpdateFlag(_extendedAttrs, ExtendedAttributes::Italics, value);
+}
+
+void TextAttribute::SetBlinking(bool value) noexcept
+{
+    WI_UpdateFlag(_extendedAttrs, ExtendedAttributes::Blinking, value);
+}
+
+void TextAttribute::SetInvisible(bool value) noexcept
+{
+    WI_UpdateFlag(_extendedAttrs, ExtendedAttributes::Invisible, value);
+}
+
+void TextAttribute::SetCrossedOut(bool value) noexcept
+{
+    WI_UpdateFlag(_extendedAttrs, ExtendedAttributes::CrossedOut, value);
+}
+
+void TextAttribute::SetDoublyUnderlined(bool value) noexcept
+{
+    WI_UpdateFlag(_extendedAttrs, ExtendedAttributes::DoublyUnderlined, value);
+}
+
+void TextAttribute::SetFaint(bool value) noexcept
+{
+    WI_UpdateFlag(_extendedAttrs, ExtendedAttributes::Faint, value);
+}
+
 // Routine Description:
 // - swaps foreground and background color
 void TextAttribute::Invert() noexcept

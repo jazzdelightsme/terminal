@@ -59,6 +59,10 @@ namespace Microsoft::Console::VirtualTerminal
         static constexpr int c_MaxBalancedPushes = 100;
 
     private:
+        // Note the +1 in the size of the bitset: this is because we use the
+        // SgrSaveRestoreStackOptions enumerands as bitset flags, so they are naturally
+        // one-based (and we don't offset them, so the lowest bit in the bitset is
+        // actually not used).
         typedef std::bitset<static_cast<size_t>(DispatchTypes::SgrSaveRestoreStackOptions::Max) + 1> AttrBitset;
 
         TextAttribute _CombineWithCurrentAttributes(const TextAttribute& currentAttributes,

@@ -145,6 +145,36 @@ public:
         return WI_IsFlagSet(_extendedAttrs, ExtendedAttributes::Bold);
     }
 
+    constexpr bool IsItalicized() const noexcept
+    {
+        return WI_IsFlagSet(_extendedAttrs, ExtendedAttributes::Italics);
+    }
+
+    constexpr bool IsBlinking() const noexcept
+    {
+        return WI_IsFlagSet(_extendedAttrs, ExtendedAttributes::Blinking);
+    }
+
+    constexpr bool IsInvisible() const noexcept
+    {
+        return WI_IsFlagSet(_extendedAttrs, ExtendedAttributes::Invisible);
+    }
+
+    constexpr bool IsCrossedOut() const noexcept
+    {
+        return WI_IsFlagSet(_extendedAttrs, ExtendedAttributes::CrossedOut);
+    }
+
+    constexpr bool IsDoublyUnderlined() const noexcept
+    {
+        return WI_IsFlagSet(_extendedAttrs, ExtendedAttributes::DoublyUnderlined);
+    }
+
+    constexpr bool IsFaint() const noexcept
+    {
+        return WI_IsFlagSet(_extendedAttrs, ExtendedAttributes::Faint);
+    }
+
     bool IsUnderline() const noexcept;
     bool IsReverseVideo() const noexcept;
 
@@ -154,6 +184,13 @@ public:
     }
 
     void SetExtendedAttributes(const ExtendedAttributes attrs) noexcept;
+
+    void SetItalics(bool value) noexcept;
+    void SetBlinking(bool value) noexcept;
+    void SetInvisible(bool value) noexcept;
+    void SetCrossedOut(bool value) noexcept;
+    void SetDoublyUnderlined(bool value) noexcept;
+    void SetFaint(bool value) noexcept;
 
     void SetForeground(const COLORREF rgbForeground) noexcept;
     void SetBackground(const COLORREF rgbBackground) noexcept;
