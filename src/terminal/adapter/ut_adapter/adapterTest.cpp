@@ -1379,7 +1379,6 @@ public:
             break;
         case DispatchTypes::GraphicsOptions::BrightForegroundBlack:
             Log::Comment(L"Testing graphics 'Bright Foreground Color Black'");
-            __debugbreak();
             _testGetSet->_attribute = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE;
             _testGetSet->_expectedAttribute = FOREGROUND_INTENSITY;
             break;
@@ -1543,11 +1542,14 @@ public:
 
         cOptions = 1;
         rgOptions[0] = DispatchTypes::GraphicsOptions::BoldBright;
+        _testGetSet->_expectedAttribute = FOREGROUND_GREEN;
         _testGetSet->_expectedAttribute.SetBold(true);
+        _testGetSet->_expectedAttribute.SetDefaultBackground();
         VERIFY_IS_TRUE(_pDispatch->SetGraphicsRendition({ rgOptions, cOptions }));
 
         rgOptions[0] = DispatchTypes::GraphicsOptions::BackgroundBlue;
-        _testGetSet->_expectedAttribute = FOREGROUND_GREEN | FOREGROUND_INTENSITY | BACKGROUND_BLUE;
+        _testGetSet->_expectedAttribute = FOREGROUND_GREEN | BACKGROUND_BLUE;
+        _testGetSet->_expectedAttribute.SetBold(true);
         VERIFY_IS_TRUE(_pDispatch->SetGraphicsRendition({ rgOptions, cOptions }));
 
         // Push, specifying that we only want to save the background, the boldness, and double-underline-ness:
@@ -1561,13 +1563,15 @@ public:
         cOptions = 2;
         rgOptions[0] = DispatchTypes::GraphicsOptions::BackgroundGreen;
         rgOptions[1] = DispatchTypes::GraphicsOptions::DoublyUnderlined;
-        _testGetSet->_expectedAttribute = FOREGROUND_GREEN | FOREGROUND_INTENSITY | BACKGROUND_GREEN;
+        _testGetSet->_expectedAttribute = FOREGROUND_GREEN | BACKGROUND_GREEN;
+        _testGetSet->_expectedAttribute.SetBold(true);
         _testGetSet->_expectedAttribute.SetDoublyUnderlined(true);
         VERIFY_IS_TRUE(_pDispatch->SetGraphicsRendition({ rgOptions, cOptions }));
 
         cOptions = 1;
         rgOptions[0] = DispatchTypes::GraphicsOptions::ForegroundRed;
-        _testGetSet->_expectedAttribute = FOREGROUND_RED | FOREGROUND_INTENSITY | BACKGROUND_GREEN;
+        _testGetSet->_expectedAttribute = FOREGROUND_RED | BACKGROUND_GREEN;
+        _testGetSet->_expectedAttribute.SetBold(true);
         _testGetSet->_expectedAttribute.SetDoublyUnderlined(true);
         VERIFY_IS_TRUE(_pDispatch->SetGraphicsRendition({ rgOptions, cOptions }));
 
@@ -1578,7 +1582,8 @@ public:
 
         // And then restore...
         cOptions = 0;
-        _testGetSet->_expectedAttribute = FOREGROUND_RED | FOREGROUND_INTENSITY | BACKGROUND_BLUE;
+        _testGetSet->_expectedAttribute = FOREGROUND_RED | BACKGROUND_BLUE;
+        _testGetSet->_expectedAttribute.SetBold(true);
         VERIFY_IS_TRUE(_pDispatch->PopGraphicsRendition());
     }
 

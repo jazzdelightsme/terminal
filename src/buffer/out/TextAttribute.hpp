@@ -40,13 +40,11 @@ public:
     {
     }
 
-    // Note that FOREGROUND_INTENSITY is stripped out (not put into _wAttrLegacy), and
-    // gets put into the _extendedAttrs instead (as Bold).
     constexpr TextAttribute(const WORD wLegacyAttr) noexcept :
         _wAttrLegacy{ gsl::narrow_cast<WORD>(wLegacyAttr & META_ATTRS) },
-        _foreground{ gsl::narrow_cast<BYTE>(wLegacyAttr & (FG_ATTRS - FOREGROUND_INTENSITY)) },
+        _foreground{ gsl::narrow_cast<BYTE>(wLegacyAttr & FG_ATTRS) },
         _background{ gsl::narrow_cast<BYTE>((wLegacyAttr & BG_ATTRS) >> 4) },
-        _extendedAttrs{ (wLegacyAttr & FOREGROUND_INTENSITY) ? ExtendedAttributes::Bold : ExtendedAttributes::Normal }
+        _extendedAttrs{ ExtendedAttributes::Normal }
     {
         // If we're given lead/trailing byte information with the legacy color, strip it.
         WI_ClearAllFlags(_wAttrLegacy, COMMON_LVB_SBCSDBCS);
