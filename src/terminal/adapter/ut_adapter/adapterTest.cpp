@@ -81,7 +81,7 @@ public:
             VERIFY_ARE_EQUAL(_expectedCursorPos, sbiex.dwCursorPosition);
             VERIFY_ARE_EQUAL(_expectedScreenBufferSize, sbiex.dwSize);
             VERIFY_ARE_EQUAL(_expectedScreenBufferViewport, sbiex.srWindow);
-            VERIFY_ARE_EQUAL(_expectedAttribute.GetLegacyAttributes(), sbiex.wAttributes);
+            VERIFY_ARE_EQUAL(_expectedAttribute, sbiex.wAttributes);
         }
         return _setConsoleScreenBufferInfoExResult;
     }
@@ -612,7 +612,6 @@ public:
         _expectedCursorVisible = _cursorVisible;
 
         // Attribute default is gray on black.
-        _attribute = {};
         _attribute = FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED;
         _expectedAttribute = _attribute;
     }
