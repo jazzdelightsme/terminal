@@ -40,11 +40,13 @@ public:
     {
     }
 
+    // Note that FOREGROUND_INTENSITY is stripped out (not put into _wAttrLegacy), and
+    // gets put into the _extendedAttrs instead (as Bold).
     constexpr TextAttribute(const WORD wLegacyAttr) noexcept :
         _wAttrLegacy{ gsl::narrow_cast<WORD>(wLegacyAttr & META_ATTRS) },
-        _foreground{ gsl::narrow_cast<BYTE>(wLegacyAttr & FG_ATTRS) },
+        _foreground{ gsl::narrow_cast<BYTE>(wLegacyAttr & (FG_ATTRS - FOREGROUND_INTENSITY)) },
         _background{ gsl::narrow_cast<BYTE>((wLegacyAttr & BG_ATTRS) >> 4) },
-        _extendedAttrs{ ExtendedAttributes::Normal }
+        _extendedAttrs{ (wLegacyAttr & FOREGROUND_INTENSITY) ? ExtendedAttributes::Bold : ExtendedAttributes::Normal }
     {
         // If we're given lead/trailing byte information with the legacy color, strip it.
         WI_ClearAllFlags(_wAttrLegacy, COMMON_LVB_SBCSDBCS);
@@ -126,14 +128,18 @@ public:
     bool IsInvisible() const noexcept;
     bool IsCrossedOut() const noexcept;
     bool IsUnderlined() const noexcept;
+    bool IsDoublyUnderlined() const noexcept;
+    bool IsFaint() const noexcept;
     bool IsReverseVideo() const noexcept;
 
     void SetBold(bool isBold) noexcept;
-    void SetItalics(bool isItalic) noexcept;
+    void SetItalic(bool isItalic) noexcept;
     void SetBlinking(bool isBlinking) noexcept;
     void SetInvisible(bool isInvisible) noexcept;
     void SetCrossedOut(bool isCrossedOut) noexcept;
-    void SetUnderline(bool isUnderlined) noexcept;
+    void SetUnderlined(bool isUnderlined) noexcept;
+    void SetDoublyUnderlined(bool isDoublyUnderlined) noexcept;
+    void SetFaint(bool isFaint) noexcept;
     void SetReverseVideo(bool isReversed) noexcept;
 
     ExtendedAttributes GetExtendedAttributes() const noexcept;
@@ -263,11 +269,12 @@ namespace WEX
             static WEX::Common::NoThrowString ToString(const TextAttribute& attr)
             {
                 return WEX::Common::NoThrowString().Format(
-                    L"{FG:%s,BG:%s,bold:%d,wLegacy:(0x%04x)}",
+                    L"{FG:%s,BG:%s,bold:%d,wLegacy:(0x%04x),ext:(0x%02x)}",
                     VerifyOutputTraits<TextColor>::ToString(attr._foreground).GetBuffer(),
                     VerifyOutputTraits<TextColor>::ToString(attr._background).GetBuffer(),
                     attr.IsBold(),
-                    attr._wAttrLegacy);
+                    attr._wAttrLegacy,
+                    attr._extendedAttrs );
             }
         };
     }

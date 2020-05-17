@@ -1402,7 +1402,7 @@ void ScreenBufferTests::VtNewlinePastViewport()
     auto fillAttr = TextAttribute{ RGB(12, 34, 56), RGB(78, 90, 12) };
     fillAttr.SetCrossedOut(true);
     fillAttr.SetReverseVideo(true);
-    fillAttr.SetUnderline(true);
+    fillAttr.SetUnderlined(true);
     si.SetAttributes(fillAttr);
     // But note that the meta attributes are expected to be cleared.
     auto expectedFillAttr = fillAttr;
@@ -1479,7 +1479,7 @@ void ScreenBufferTests::VtNewlinePastEndOfBuffer()
     auto fillAttr = TextAttribute{ RGB(12, 34, 56), RGB(78, 90, 12) };
     fillAttr.SetCrossedOut(true);
     fillAttr.SetReverseVideo(true);
-    fillAttr.SetUnderline(true);
+    fillAttr.SetUnderlined(true);
     si.SetAttributes(fillAttr);
     // But note that the meta attributes are expected to be cleared.
     auto expectedFillAttr = fillAttr;
@@ -3393,7 +3393,7 @@ void ScreenBufferTests::ScrollOperations()
     auto fillAttr = TextAttribute{ RGB(12, 34, 56), RGB(78, 90, 12) };
     fillAttr.SetCrossedOut(true);
     fillAttr.SetReverseVideo(true);
-    fillAttr.SetUnderline(true);
+    fillAttr.SetUnderlined(true);
     si.SetAttributes(fillAttr);
     // But note that the meta attributes are expected to be cleared.
     auto expectedFillAttr = fillAttr;
@@ -3514,7 +3514,7 @@ void ScreenBufferTests::InsertChars()
     auto fillAttr = TextAttribute{ RGB(12, 34, 56), RGB(78, 90, 12) };
     fillAttr.SetCrossedOut(true);
     fillAttr.SetReverseVideo(true);
-    fillAttr.SetUnderline(true);
+    fillAttr.SetUnderlined(true);
     si.SetAttributes(fillAttr);
     // But note that the meta attributes are expected to be cleared.
     auto expectedFillAttr = fillAttr;
@@ -3674,7 +3674,7 @@ void ScreenBufferTests::DeleteChars()
     auto fillAttr = TextAttribute{ RGB(12, 34, 56), RGB(78, 90, 12) };
     fillAttr.SetCrossedOut(true);
     fillAttr.SetReverseVideo(true);
-    fillAttr.SetUnderline(true);
+    fillAttr.SetUnderlined(true);
     si.SetAttributes(fillAttr);
     // But note that the meta attributes are expected to be cleared.
     auto expectedFillAttr = fillAttr;
@@ -3905,10 +3905,8 @@ void ScreenBufferTests::EraseTests()
     // Set the attributes that will be used to fill the erased area.
     auto fillAttr = TextAttribute{ RGB(12, 34, 56), RGB(78, 90, 12) };
     fillAttr.SetCrossedOut(true);
-    fillAttr.SetReverseVideo(true);
-    fillAttr.SetUnderline(true);
-    si.SetAttributes(fillAttr);
-    // But note that the meta attributes are expected to be cleared.
+    fillAttr.SetReverseVideo(true); fillAttr.SetUnderlined(true);
+    si.SetAttributes(fillAttr); // But note that the meta attributes are expected to be cleared.
     auto expectedFillAttr = fillAttr;
     expectedFillAttr.SetStandardErase();
 
@@ -5205,7 +5203,7 @@ void ScreenBufferTests::TestExtendedTextAttributesWithColors()
     }
     if (italics)
     {
-        expectedAttr.SetItalics(true);
+        expectedAttr.SetItalic(true);
         vtSeq += L"\x1b[3m";
     }
     if (blink)
@@ -5312,7 +5310,7 @@ void ScreenBufferTests::TestExtendedTextAttributesWithColors()
     }
     if (italics)
     {
-        expectedAttr.SetItalics(false);
+        expectedAttr.SetItalic(false);
         vtSeq = L"\x1b[23m";
         validate(expectedAttr, vtSeq);
     }
@@ -5786,7 +5784,7 @@ void ScreenBufferTests::ScreenAlignmentPattern()
     // Set the initial attributes.
     auto initialAttr = TextAttribute{ RGB(12, 34, 56), RGB(78, 90, 12) };
     initialAttr.SetReverseVideo(true);
-    initialAttr.SetUnderline(true);
+    initialAttr.SetUnderlined(true);
     si.SetAttributes(initialAttr);
 
     // Set some margins.

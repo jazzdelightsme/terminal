@@ -140,13 +140,13 @@ namespace Microsoft::Console::VirtualTerminal
             // Italics = 3,
             if (validParts.test(static_cast<size_t>(DispatchTypes::SgrSaveRestoreStackOptions::Italics)))
             {
-                result.SetItalics(savedAttribute.IsItalicized());
+                result.SetItalic(savedAttribute.IsItalic());
             }
 
             // Underline = 4,
             if (validParts.test(static_cast<size_t>(DispatchTypes::SgrSaveRestoreStackOptions::Underline)))
             {
-                result.SetUnderline(savedAttribute.IsUnderline());
+                result.SetUnderlined(savedAttribute.IsUnderlined());
             }
 
             // Blink = 5,

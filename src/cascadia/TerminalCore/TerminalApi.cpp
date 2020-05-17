@@ -76,7 +76,7 @@ bool Terminal::BoldText(bool boldOn) noexcept
 bool Terminal::UnderlineText(bool underlineOn) noexcept
 {
     TextAttribute attrs = _buffer->GetCurrentAttributes();
-    attrs.SetUnderline(underlineOn);
+    attrs.SetUnderlined(underlineOn);
     _buffer->SetCurrentAttributes(attrs);
     return true;
 }

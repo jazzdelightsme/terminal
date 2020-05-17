@@ -118,6 +118,36 @@ void TextAttribute::SetColor(const COLORREF rgbColor, const bool fIsForeground) 
     }
 }
 
+bool TextAttribute::IsLeadingByte() const noexcept
+{
+    return WI_IsFlagSet(_wAttrLegacy, COMMON_LVB_LEADING_BYTE);
+}
+
+bool TextAttribute::IsTrailingByte() const noexcept
+{
+    return WI_IsFlagSet(_wAttrLegacy, COMMON_LVB_LEADING_BYTE);
+}
+
+bool TextAttribute::IsTopHorizontalDisplayed() const noexcept
+{
+    return WI_IsFlagSet(_wAttrLegacy, COMMON_LVB_GRID_HORIZONTAL);
+}
+
+bool TextAttribute::IsBottomHorizontalDisplayed() const noexcept
+{
+    return WI_IsFlagSet(_wAttrLegacy, COMMON_LVB_UNDERSCORE);
+}
+
+bool TextAttribute::IsLeftVerticalDisplayed() const noexcept
+{
+    return WI_IsFlagSet(_wAttrLegacy, COMMON_LVB_GRID_LVERTICAL);
+}
+
+bool TextAttribute::IsRightVerticalDisplayed() const noexcept
+{
+    return WI_IsFlagSet(_wAttrLegacy, COMMON_LVB_GRID_RVERTICAL);
+}
+
 void TextAttribute::SetLeftVerticalDisplayed(const bool isDisplayed) noexcept
 {
     WI_UpdateFlag(_wAttrLegacy, COMMON_LVB_GRID_LVERTICAL, isDisplayed);
@@ -159,6 +189,16 @@ bool TextAttribute::IsUnderlined() const noexcept
     return WI_IsFlagSet(_wAttrLegacy, COMMON_LVB_UNDERSCORE);
 }
 
+bool TextAttribute::IsDoublyUnderlined() const noexcept
+{
+    return WI_IsFlagSet(_extendedAttrs, ExtendedAttributes::DoublyUnderlined);
+}
+
+bool TextAttribute::IsFaint() const noexcept
+{
+    return WI_IsFlagSet(_extendedAttrs, ExtendedAttributes::Faint);
+}
+
 bool TextAttribute::IsReverseVideo() const noexcept
 {
     return WI_IsFlagSet(_wAttrLegacy, COMMON_LVB_REVERSE_VIDEO);
@@ -169,7 +209,7 @@ void TextAttribute::SetBold(bool isBold) noexcept
     WI_UpdateFlag(_extendedAttrs, ExtendedAttributes::Bold, isBold);
 }
 
-void TextAttribute::SetItalics(bool isItalic) noexcept
+void TextAttribute::SetItalic(bool isItalic) noexcept
 {
     WI_UpdateFlag(_extendedAttrs, ExtendedAttributes::Italics, isItalic);
 }
@@ -189,10 +229,20 @@ void TextAttribute::SetCrossedOut(bool isCrossedOut) noexcept
     WI_UpdateFlag(_extendedAttrs, ExtendedAttributes::CrossedOut, isCrossedOut);
 }
 
-void TextAttribute::SetUnderline(bool isUnderlined) noexcept
+void TextAttribute::SetUnderlined(bool isUnderlined) noexcept
 {
     // TODO:GH#2915 Treat underline separately from LVB_UNDERSCORE
     WI_UpdateFlag(_wAttrLegacy, COMMON_LVB_UNDERSCORE, isUnderlined);
+}
+
+void TextAttribute::SetDoublyUnderlined(bool isDoublyUnderlined) noexcept
+{
+    WI_UpdateFlag(_extendedAttrs, ExtendedAttributes::DoublyUnderlined, isDoublyUnderlined);
+}
+
+void TextAttribute::SetFaint(bool isFaint) noexcept
+{
+    WI_UpdateFlag(_extendedAttrs, ExtendedAttributes::Faint, isFaint);
 }
 
 void TextAttribute::SetReverseVideo(bool isReversed) noexcept

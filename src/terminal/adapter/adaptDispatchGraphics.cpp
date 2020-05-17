@@ -125,10 +125,10 @@ bool AdaptDispatch::SetGraphicsRendition(const std::basic_string_view<DispatchTy
                 attr.SetBold(false);
                 break;
             case Italics:
-                attr.SetItalics(true);
+                attr.SetItalic(true);
                 break;
             case NotItalics:
-                attr.SetItalics(false);
+                attr.SetItalic(false);
                 break;
             case BlinkOrXterm256Index:
                 attr.SetBlinking(true);
@@ -145,6 +145,9 @@ bool AdaptDispatch::SetGraphicsRendition(const std::basic_string_view<DispatchTy
             case CrossedOut:
                 attr.SetCrossedOut(true);
                 break;
+            case DoublyUnderlined:
+                attr.SetDoublyUnderlined(true);
+                break;
             case NotCrossedOut:
                 attr.SetCrossedOut(false);
                 break;
@@ -155,10 +158,10 @@ bool AdaptDispatch::SetGraphicsRendition(const std::basic_string_view<DispatchTy
                 attr.SetReverseVideo(false);
                 break;
             case Underline:
-                attr.SetUnderline(true);
+                attr.SetUnderlined(true);
                 break;
             case NoUnderline:
-                attr.SetUnderline(false);
+                attr.SetUnderlined(false);
                 break;
             case ForegroundBlack:
                 attr.SetIndexedForeground(DARK_BLACK);
@@ -260,7 +263,7 @@ bool AdaptDispatch::SetGraphicsRendition(const std::basic_string_view<DispatchTy
                 i += _SetRgbColorsHelper(options.substr(i + 1), attr, true);
                 break;
             case BackgroundExtended:
-    bool success = _pConApi->PrivateGetConsoleScreenBufferAttributes(attr);
+                i += _SetRgbColorsHelper(options.substr(i + 1), attr, false);
                 break;
             }
         }
