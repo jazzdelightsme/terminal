@@ -212,8 +212,9 @@ namespace Microsoft::Console::VirtualTerminal
 
         bool _VerifyDeviceAttributesParams(const gsl::span<const size_t> parameters) const noexcept;
 
-        bool _GetPrivateModeParams(const gsl::span<const size_t> parameters,
-                                   std::vector<DispatchTypes::PrivateModeParams>& privateModes) const;
+        template<typename TParamType, bool bIgnoreNarrowingConversionFailures = true>
+        bool _GetTypedParams(const gsl::span<const size_t> parameters,
+                             std::vector<TParamType>& typedParams) const;
 
         static constexpr size_t DefaultTopMargin = 0;
         static constexpr size_t DefaultBottomMargin = 0;

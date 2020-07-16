@@ -747,7 +747,7 @@ bool OutputStateMachineEngine::_IntermediateQuestionMarkDispatch(const wchar_t w
     {
     case VTActionCodes::DECSET_PrivateModeSet:
     case VTActionCodes::DECRST_PrivateModeReset:
-        success = _GetPrivateModeParams(parameters, privateModeParams);
+        success = _GetTypedParams(parameters, privateModeParams);
         break;
 
     default:
@@ -1337,23 +1337,52 @@ bool OutputStateMachineEngine::_GetDeviceStatusOperation(const gsl::span<const s
 }
 
 // Routine Description:
-// - Retrieves the listed private mode params be set/reset by DECSET/DECRST
+// - Converts the untyped array of numeric parameters into an array of the specified type.
 // Arguments:
 // - parameters - The parameters to parse
-// - privateModes - Space that will be filled with valid params from the PrivateModeParams enum
+// - typedParams - Space that will be filled with valid params from the TParamType enum
 // Return Value:
-// - True if we successfully retrieved an array of private mode params from the parameters we've stored. False otherwise.
-bool OutputStateMachineEngine::_GetPrivateModeParams(const gsl::span<const size_t> parameters,
-                                                     std::vector<DispatchTypes::PrivateModeParams>& privateModes) const
+// - True if we successfully retrieved an array of strongly-typed params from the
+//   parameters we've stored. False otherwise.
+template<typename TParamType, bool bIgnoreNarrowingConversionFailures>
+bool OutputStateMachineEngine::_GetTypedParams(const gsl::span<const size_t> parameters,
+                                               std::vector<TParamType>& typedParams) const
 {
     bool success = false;
-    // Can't just set nothing at all
     if (parameters.size() > 0)
     {
         for (const auto& p : parameters)
         {
-            privateModes.push_back((DispatchTypes::PrivateModeParams)p);
+            // No memcpy. The parameters are size_t. The type we are converting to may be
+            // a different size.
+            //
+            // Note that we use gsl::narrow_cast, not gsl::narrow, because we don't want
+            // someone to be able to shove a too-big number in and cause a crash. Instead,
+            // we will detect truncation after the fact, and ignore the parameter if that
+            // happened. And by "ignore the parameter", we mean it won't even be put into
+            // typedParams (as opposed to, say, entering a 0, which may have some
+            // meaning). The caller can check this, if desired, by checking if the number
+            // of parameters they passed in equals the number of parameters they got out.
+            TParamType tmp = gsl::narrow_cast<TParamType>(p);
+            if (gsl::narrow_cast<size_t>(tmp) == p)
+            {
+                typedParams.push_back(tmp);
+            }
+            else if (bIgnoreNarrowingConversionFailures)
+            {
+                // we ignore the parameter
+            }
+            else
+            {
+                success = false;
+                break;
+            }
         }
+
+        success = true;
+    }
+    else
+    {
         success = true;
     }
     return success;

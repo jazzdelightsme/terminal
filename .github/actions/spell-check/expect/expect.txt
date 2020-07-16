@@ -2368,6 +2368,7 @@ tosign
 touchpad
 towlower
 towupper
+TParam
 Tpp
 Tpqrst
 tprivapi
